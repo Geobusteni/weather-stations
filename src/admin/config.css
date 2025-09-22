@@ -1,0 +1,11 @@
+.kst-weather-stations-form {
+    /* Spacing */
+    --spacing-xs: calc(var(--spacing-n) / 4);
+    --spacing-s: calc(var(--spacing-n) / 2);
+    --spacing-n: 1rem;
+    --spacing-m: calc(var(--spacing-n) * 1.5);
+    --spacing-l: calc(var(--spacing-n) * 2);
+
+    /* Structure */
+    --radius: 0.5rem;
+}

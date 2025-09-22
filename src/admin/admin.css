@@ -1,0 +1,79 @@
+@import "config.css";
+
+.kst-weather-stations-form {
+    padding: var(--spacing-m) var(--spacing-l);
+
+
+    .kst-field-address-search {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-s);
+
+        & label {
+            align-items: center;
+            display: flex;
+            gap: var(--spacing-xs);
+            justify-content: flex-start;
+
+            & span {
+                min-width: 100px;
+            }
+
+            & input {
+                &[readonly] {
+                    min-width: 200px;
+
+                    &:focus {
+                        border-color: inherit;
+                        box-shadow: none;
+                        outline: none;
+                    }
+                }
+            }
+        }
+
+        & .geocode {
+            margin-left: var(--spacing-s);
+        }
+
+        & [id="mapbox-geocoder-mapbox-default-center"] div {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-s);
+            justify-content: flex-start;
+            max-width: 360px;
+
+            & > svg {
+                display: none;
+            }
+
+            & .suggestions-wrapper {
+                background-color: #fff;
+                flex-basis: 100%;
+                padding: var(--spacing-s) var(--spacing-xs);
+
+                & li {
+                    cursor: pointer;
+                    padding: 0 0 var(--spacing-xs);
+
+                    &:hover {
+                        background-color: #cdcdcd;
+                    }
+                }
+            }
+        }
+
+        & [id="mapbox-render-mapbox-default-center"] {
+            aspect-ratio: 16/9;
+            max-width: 360px;
+            min-height: 300px;
+        }
+    }
+
+    input {
+        &.readonly {
+            pointer-events: none !important;
+        }
+    }
+}

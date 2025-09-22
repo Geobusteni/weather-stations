@@ -1,0 +1,26 @@
+{
+    "name": "alex/wehather-stations",
+    "description": "A plugin to show weather stations data in OpenStreet maps enabled frontend.",
+    "type": "wordpress-plugin",
+    "require-dev": {
+      "squizlabs/php_codesniffer": "^3.3",
+      "dekode/coding-standards": "^6.3",
+        "phpunit/phpunit": "^12.3",
+        "10up/wp_mock": "^0.4.2"
+    },
+    "license": "GPL2+",
+    "autoload": {
+        "classmap": ["includes/admin"]
+    },
+    "authors": [
+        {
+            "name": "Alexandru Negoita"
+        }
+    ],
+    "minimum-stability": "stable",
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
