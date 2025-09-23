@@ -21,6 +21,7 @@ namespace KST\WeatherStations;
 use KST\WeatherStations\Admin\Settings;
 use KST\WeatherStations\Admin\Admin;
 use KST\WeatherStations\API\Geocoding;
+use KST\WeatherStations\API\OpenWeather;
 
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -40,6 +41,19 @@ function get_geocoding(): Geocoding {
     static $instance = null;
     if (null === $instance) {
         $instance = new Geocoding();
+    }
+    return $instance;
+}
+
+/**
+ * Get instance of the OpenWeather class.
+ *
+ * @return OpenWeather
+ */
+function get_weather(): OpenWeather {
+    static $instance = null;
+    if (null === $instance) {
+        $instance = new OpenWeather();
     }
     return $instance;
 }
