@@ -1,0 +1,15 @@
+.weather-station-location-panel .coordinates-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.weather-station-location-panel .error-message {
+    color: #cc1818;
+    margin-top: 1rem;
+}
+
+.weather-station-location-panel input[type="number"] {
+    width: 100%;
+}
