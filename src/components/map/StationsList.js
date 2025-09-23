@@ -12,6 +12,14 @@ const StationsList = ({ stations, onStationClick }) => {
         );
     }
 
+    const handleStationWeatherData = (id) => {
+        // Get me the weather data for the post.
+        const weatherData = useSelect((select) => {
+            return select('core').getEntityRecord('postType', 'weather_station', id);
+        }, [id]);
+        return weatherData;
+    }
+
     return (
         <div className="weather-stations-list">
             <h3>{__('Weather Stations', 'kst-weather-stations')}</h3>
