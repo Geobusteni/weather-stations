@@ -177,25 +177,28 @@ class Admin {
             'type' => 'object',
             'single' => true,
             'show_in_rest' => [
-                'schema' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'temp' => ['type' => 'number'],
-                        'feels_like' => ['type' => 'number'],
-                        'humidity' => ['type' => 'number'],
-                        'wind_speed' => ['type' => 'number'],
-                        'wind_deg' => ['type' => 'number'],
-                        'weather' => [
-                            'type' => 'object',
-                            'properties' => [
-                                'main' => ['type' => 'string'],
-                                'description' => ['type' => 'string'],
-                                'icon' => ['type' => 'string'],
-                            ],
-                        ],
-                        'timestamp' => ['type' => 'number'],
-                    ],
-                ],
+	            'schema' => [
+		            'type'                 => 'object',
+		            'additionalProperties' => [
+			            'type'       => 'object',
+			            'properties' => [
+				            'temp'       => [ 'type' => 'number' ],
+				            'feels_like' => [ 'type' => 'number' ],
+				            'humidity'   => [ 'type' => 'number' ],
+				            'wind_speed' => [ 'type' => 'number' ],
+				            'wind_deg'   => [ 'type' => 'number' ],
+				            'weather'    => [
+					            'type'       => 'object',
+					            'properties' => [
+						            'main'        => [ 'type' => 'string' ],
+						            'description' => [ 'type' => 'string' ],
+						            'icon'        => [ 'type' => 'string' ],
+					            ],
+				            ],
+				            'timestamp' => [ 'type' => 'number' ],
+			            ],
+		            ],
+	            ],
             ],
             'auth_callback' => function() {
                 return \current_user_can('edit_posts');
@@ -409,17 +412,33 @@ class Admin {
 
         // Get weather data
         $api = new OpenWeather();
-        $weather_data = $api->getCurrentWeather((float) $latitude, (float) $longitude);
+        $weather_data_metric = $api->getCurrentWeather((float) $latitude, (float) $longitude, ['units' => 'metric']);
+		$weather_data_imperial = $api->getCurrentWeather((float) $latitude, (float) $longitude, ['units' => 'imperial']);
 
-        if (\is_wp_error($weather_data)) {
+        if (\is_wp_error($weather_data_metric)) {
             // Log error and return false
             \error_log(\sprintf(
                 'Weather station update failed for post %d: %s',
                 $post_id,
-                $weather_data->get_error_message()
+	            $weather_data_metric->get_error_message()
             ));
             return false;
         }
+
+	    if (\is_wp_error($weather_data_imperial)) {
+		    // Log error and return false
+		    \error_log(\sprintf(
+			    'Weather station update failed for post %d: %s',
+			    $post_id,
+			    $weather_data_imperial->get_error_message()
+		    ));
+		    return false;
+	    }
+
+		$weather_data = [
+			'metric' => $weather_data_metric,
+			'imperial' => $weather_data_imperial,
+		];
 
         // Update post meta
         \update_post_meta($post_id, self::META_KEYS['weather_data'], $weather_data);

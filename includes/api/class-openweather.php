@@ -19,7 +19,7 @@ class OpenWeather {
      *
      * @var string
      */
-    private const API_URL = 'https://api.openweathermap.org/data/3.0/onecall';
+    private const API_URL = 'https://api.openweathermap.org/data/3.0/onecall/timemachine';
 
     /**
      * Meta keys for storing weather data.
@@ -105,13 +105,13 @@ class OpenWeather {
                 'main' => $weather_data['weather']['main'] ?? null,
                 'description' => $weather_data['weather']['description'] ?? null,
                 'icon' => $weather_data['weather']['icon'] ?? null,
-                'icon_url' => isset($weather_data['weather']['icon']) 
+                'icon_url' => isset($weather_data['weather']['icon'])
                     ? self::getWeatherIconUrl($weather_data['weather']['icon'])
                     : null,
             ],
             'last_update' => [
                 'timestamp' => $weather_data['timestamp'] ?? null,
-                'formatted' => $last_update 
+                'formatted' => $last_update
                     ? \wp_date(
                         \sprintf(
                             /* translators: 1: Date format, 2: Time format */
@@ -209,10 +209,11 @@ class OpenWeather {
     public function getCurrentWeather(float $lat, float $lon, array $options = []): array|\WP_Error {
         // Build query parameters
         $params = \array_merge([
-            'lat' => $lat,
-            'lon' => $lon,
-            'exclude' => 'minutely,hourly,daily,alerts',
+            'lat'   => $lat,
+            'lon'   => $lon,
             'units' => 'metric',
+			'dt'    => strtotime('today'),
+			'lang'  => explode( '_', get_locale())[0],
             'appid' => $this->api_key,
         ], $options);
 
@@ -262,7 +263,7 @@ class OpenWeather {
      * @return array Formatted weather data.
      */
     private function formatWeatherData(array $data): array {
-        $current = $data['current'] ?? [];
+        $current = $data['data'][0] ?? [];
 
         return [
             'temp' => $current['temp'] ?? null,
@@ -291,7 +292,7 @@ class OpenWeather {
 
         // Test the API key with a sample request
         $test = $this->getCurrentWeather(0, 0);
-        
+
         // Even an invalid location should return a proper error response
         // A WP_Error with 'openweather_api_error' means the request worked but returned an error
         // Any other type of error means the API key is likely invalid
