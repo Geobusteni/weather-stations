@@ -21,6 +21,7 @@ namespace KST\WeatherStations;
 use KST\WeatherStations\Admin\Settings;
 use KST\WeatherStations\Admin\Admin;
 use KST\WeatherStations\API\Geocoding;
+use KST\WeatherStations\BlockRegistry;
 use KST\WeatherStations\API\OpenWeather;
 
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
@@ -69,6 +70,9 @@ function init(): void {
         Settings::getInstance();
         Admin::getInstance();
     }
+
+    // Register blocks
+    BlockRegistry::getInstance();
 }
 
 // Initialize the plugin.

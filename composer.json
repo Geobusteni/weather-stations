@@ -10,7 +10,7 @@
     },
     "license": "GPL2+",
     "autoload": {
-        "classmap": ["includes/admin"]
+        "classmap": ["includes/admin", "includes"]
     },
     "authors": [
         {
