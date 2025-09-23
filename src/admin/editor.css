@@ -13,3 +13,56 @@
 .weather-station-location-panel input[type="number"] {
     width: 100%;
 }
+
+/* Weather Panel Styles */
+.weather-station-weather-panel .weather-data {
+    margin-bottom: 1rem;
+}
+
+.weather-station-weather-panel .weather-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.weather-station-weather-panel .weather-row:last-child {
+    border-bottom: none;
+}
+
+.weather-station-weather-panel .label {
+    font-weight: 500;
+    color: #1e1e1e;
+}
+
+.weather-station-weather-panel .value {
+    color: #757575;
+}
+
+.weather-station-weather-panel .weather-icon {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+}
+
+.weather-station-weather-panel .last-update {
+    margin-top: 1rem;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.weather-station-weather-panel .weather-actions {
+    margin-top: 1.5rem;
+}
+
+.weather-station-weather-panel .components-button.is-primary {
+    width: 100%;
+    justify-content: center;
+}
+
+.weather-station-weather-panel .components-button .components-spinner {
+    margin: 0 10px 0 0;
+}
