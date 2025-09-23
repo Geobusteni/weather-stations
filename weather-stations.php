@@ -117,8 +117,8 @@ function handle_map_page( int $newId ): bool {
 }
 
 add_action( 'update_option_kst-weather-stations', function( $old_value, $new_value ) {
-	$map_page = $new_value['map-page'] ?? -1;
-	$old_page = $old_value['map-page'] ?? -1;
+	$map_page = (int) $new_value['map-page'] ?? -1;
+	$old_page = (int) $old_value['map-page'] ?? -1;
 
 	if ( $map_page !== $old_page ) {
 		handle_map_page( $map_page ); // safe, won't loop

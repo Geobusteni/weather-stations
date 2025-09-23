@@ -16,64 +16,80 @@ namespace KST\WeatherStations\Admin\Fields;
 class AddressSearchField extends KSTAbstractField {
 
     public function render(): string {
-        // Main address field
-        $args = [
-            'id'    => $this->id,
-            'name'  => $this->args['setting'] . '[' . $this->id . '][address]',
-            'value' => isset($this->args['value']['address']) ? $this->args['value']['address'] : '',
-            'type'  => 'hidden',
+        // Get current values
+        $current_value = $this->args['value'] ?? [];
+        $address = $current_value['address'] ?? '';
+        $lat = $current_value['lat'] ?? '';
+        $lng = $current_value['lng'] ?? '';
+
+        // Create address search input
+        $search_args = [
+            'type' => 'text',
+            'id' => $this->id . '_search',
+            'class' => 'regular-text',
+            'placeholder' => \__('Search for an address...', 'kst-weather-stations'),
         ];
 
-        if ( ! empty( $this->args['class'] ) ) {
-            if ( is_array( $this->args['class'] ) ) {
-                $args['class'] = implode( ' ', $this->args['class'] );
-            } else {
-                $args['class'] = $this->args['class'];
-            }
-        }
+        // Create hidden fields for actual data
+        $address_args = [
+            'type' => 'hidden',
+            'id' => $this->id . '_address',
+            'name' => $this->args['setting'] . '[' . $this->id . '][address]',
+            'value' => $address,
+        ];
 
-        $address_field = '<div class="row"><input ' . $this->process_attr( $args ) . '/>';
-        $subfields = [];
+        $lat_args = [
+            'type' => 'text',
+            'id' => $this->id . '_lat',
+            'name' => $this->args['setting'] . '[' . $this->id . '][lat]',
+            'value' => $lat,
+            'class' => 'small-text',
+            'readonly' => 'readonly',
+        ];
 
-        // If it has subfields (lat/lng)
-        if ( ! empty( $this->args['fields'] ) ) {
-            foreach ( $this->args['fields'] as $key => $field ) {
-                $sub_args = [
-                    'id'      => $this->id . '_' . $key,
-                    'name'    => $this->args['setting'] . '[' . $this->id . '][' . $key . ']',
-                    'class'   => ! empty( $field['class'] ) ? $field['class'] : '',
-                    'type'    => $field['type'],
-                    'value'   => isset($this->args['value'][$key]) ? $this->args['value'][$key] : '',
-                    'setting' => $this->args['setting'],
-                ];
+        $lng_args = [
+            'type' => 'text',
+            'id' => $this->id . '_lng',
+            'name' => $this->args['setting'] . '[' . $this->id . '][lng]',
+            'value' => $lng,
+            'class' => 'small-text',
+            'readonly' => 'readonly',
+        ];
 
-                foreach ( $field as $subfield_key => $value ) {
-                    if (!isset($sub_args[$subfield_key])) {
-                        $sub_args[$subfield_key] = $value;
-                    }
-                }
-
-                $subfield_html = '<input ' . $this->process_attr( $sub_args ) . '/>';
-
-                if ( ! empty( $sub_args['label'] ) ) {
-                    $subfield_html = sprintf(
-                        '<label for="%s"><span>%s</span>%s</label>',
-                        \esc_attr( $sub_args['id'] ),
-                        $sub_args['label'],
-                        $subfield_html
-                    );
-                }
-
-                $subfields[] = $subfield_html;
-            }
-        }
-
-        return \sprintf(
-            '<fieldset class="kst-field-address-search">%s %s <div id="%s"></div><div id="%s"></div></fieldset>',
-            $address_field,
-            \implode('', $subfields),
-            \esc_attr( 'mapbox-geocoder-' . $this->id ),
-            \esc_attr( 'mapbox-render-' . $this->id )
+        // Build the field HTML
+        $html = '<fieldset class="kst-field-address-search">';
+        
+        // Geocoder container
+        $html .= \sprintf(
+            '<div class="geocoder-container" id="%s"></div>',
+            \esc_attr('mapbox-geocoder-' . $this->id)
         );
+
+        // Hidden address field
+        $html .= '<input ' . $this->process_attr($address_args) . '/>';
+
+        // Coordinates group
+        $html .= '<div class="coordinates-group">';
+        $html .= \sprintf(
+            '<label><span>%s</span><input %s/></label>',
+            \__('Latitude', 'kst-weather-stations'),
+            $this->process_attr($lat_args)
+        );
+        $html .= \sprintf(
+            '<label><span>%s</span><input %s/></label>',
+            \__('Longitude', 'kst-weather-stations'),
+            $this->process_attr($lng_args)
+        );
+        $html .= '</div>';
+
+        // Map container
+        $html .= \sprintf(
+            '<div class="map-container" id="%s"></div>',
+            \esc_attr('mapbox-render-' . $this->id)
+        );
+
+        $html .= '</fieldset>';
+
+        return $html;
     }
 }

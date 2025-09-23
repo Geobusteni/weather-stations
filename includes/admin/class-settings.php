@@ -135,35 +135,68 @@ class Settings {
 	 *
 	 * @return void
 	 */
-	public function enqueue_scripts( string $id ): void {
-		$screen = \get_current_screen();
-		if ( ! $screen ) {
-			return;
-		}
+    public function enqueue_scripts( string $id ): void {
+        $screen = \get_current_screen();
+        if ( ! $screen ) {
+            return;
+        }
 
-		$options = \get_option( $this->setting_name );
+        $options = \get_option( $this->setting_name );
 
-		if ( $screen->id === $id ) {
-			\wp_enqueue_style( $this->setting_name . 'admin-css' );
-			\wp_enqueue_script( $this->setting_name . 'admin-js' );
+        if ( $screen->id === $id ) {
+            // Enqueue Mapbox GL JS
+            \wp_enqueue_script(
+                'mapbox-gl',
+                'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js',
+                [],
+                '2.15.0',
+                true
+            );
 
-			\wp_localize_script(
-				$this->setting_name . 'admin-js',
-				'KSTWeatherStations',
-				[
-					'mapToken' => $options['mapbox-token'] ?? '',
-					'dataToken' => $options['data-token'] ?? '',
-					'defaultCenter' => $options['mapbox-default-center'] ?? [
-						'address' => '',
-						'lat' => '',
-						'lng' => ''
-					],
-					'zoom' => $options['mapbox-zoom'] ?? '9',
-					'theme' => $options['mapbox-theme'] ?? 'standard'
-				]
-			);
-		}
-	}
+            \wp_enqueue_style(
+                'mapbox-gl',
+                'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css',
+                [],
+                '2.15.0'
+            );
+
+            // Enqueue Mapbox Geocoder
+            \wp_enqueue_script(
+                'mapbox-geocoder',
+                'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js',
+                ['mapbox-gl'],
+                '5.0.0',
+                true
+            );
+
+            \wp_enqueue_style(
+                'mapbox-geocoder',
+                'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css',
+                ['mapbox-gl'],
+                '5.0.0'
+            );
+
+            // Enqueue our admin scripts
+            \wp_enqueue_style( $this->setting_name . 'admin-css' );
+            \wp_enqueue_script( $this->setting_name . 'admin-js' );
+
+            \wp_localize_script(
+                $this->setting_name . 'admin-js',
+                'KSTWeatherStations',
+                [
+                    'mapToken' => $options['mapbox-token'] ?? '',
+                    'dataToken' => $options['data-token'] ?? '',
+                    'defaultCenter' => $options['mapbox-default-center'] ?? [
+                        'address' => '',
+                        'lat' => '',
+                        'lng' => ''
+                    ],
+                    'zoom' => $options['mapbox-zoom'] ?? '9',
+                    'theme' => $options['mapbox-theme'] ?? 'standard'
+                ]
+            );
+        }
+    }
 
 
 	/**
