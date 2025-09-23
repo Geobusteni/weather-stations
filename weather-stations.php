@@ -20,8 +20,7 @@ namespace KST\WeatherStations;
 // Autoload the dependencies.
 use KST\WeatherStations\Admin\Settings;
 use KST\WeatherStations\Admin\Admin;
-use KST\WeatherStations\Admin\Activator;
-use KST\WeatherStations\Admin\Deactivator;
+use KST\WeatherStations\API\Geocoding;
 
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -31,6 +30,19 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 const VERSION = '1.0.0';
 define('KST\WeatherStations\URL', \plugin_dir_url(__FILE__));
 define('KST\WeatherStations\PATH', \plugin_dir_path(__FILE__));
+
+/**
+ * Get instance of the Geocoding class.
+ *
+ * @return Geocoding
+ */
+function get_geocoding(): Geocoding {
+    static $instance = null;
+    if (null === $instance) {
+        $instance = new Geocoding();
+    }
+    return $instance;
+}
 
 /**
  * Initialize plugin functionality.
