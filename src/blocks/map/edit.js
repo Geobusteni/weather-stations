@@ -4,33 +4,64 @@
 import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies.
  */
 import './editor.scss';
 
-/**
- * The edit function describes the structure of your block in the editor.
- *
- * @return {Element} Element to render.
- */
 export default function Edit({ attributes, setAttributes }) {
-    const { title, selectedStations = [], showAllStations } = attributes;
+    const { selectedStations = [], showAllStations } = attributes;
     const blockProps = useBlockProps({
         className: 'weather-stations-map',
     });
 
-    const allStations = useSelect(
-        (select) =>
-            select('core').getEntityRecords('postType', 'weather_station', {
-                per_page: -1,
-                order: 'ASC',
-                orderby: 'title',
-            }),
-        [selectedStations, showAllStations]
-    );
+    const [allStations, setAllStations] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchAllStations = async () => {
+            try {
+                let page = 1;
+                let stations = [];
+                let totalPages = 1;
+
+                while (page <= totalPages) {
+                    const response = await apiFetch({
+                        path: `/wp/v2/weather-station?per_page=100&page=${page}&orderby=title&order=asc`,
+                        parse: false, // get raw Response object
+                    });
+
+                    const data = await response.json();
+                    const totalPagesHeader = response.headers.get('X-WP-TotalPages');
+                    totalPages = totalPagesHeader ? parseInt(totalPagesHeader, 10) : 1;
+
+                    stations = [...stations, ...data];
+                    page++;
+                }
+
+                if (isMounted) {
+                    setAllStations(stations);
+                }
+            } catch (error) {
+                console.error('Failed to fetch stations:', error);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchAllStations();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const handleStationsArray = (stations, current) => {
         const updatedStations = [...stations];
@@ -46,14 +77,18 @@ export default function Edit({ attributes, setAttributes }) {
     };
 
     const makeStationsCheckbox = (stations) => {
-        if( !stations || stations.length <= 0 ) {
-            return __('There are no stations. Please go and create some stations posts.', 'weather-stations-map');
+        if (loading) {
+            return __('Loading stations…', 'weather-stations-map');
         }
 
-        return stations?.map((station) => (
+        if (!stations || stations.length <= 0) {
+            return __('There are no stations. Please go and create some station posts.', 'weather-stations-map');
+        }
+
+        return stations.map((station) => (
             <ToggleControl
                 key={station.id}
-                label={station.title.rendered}
+                label={station.title?.rendered || station.slug}
                 checked={selectedStations.includes(station.id)}
                 onChange={() => {
                     setAttributes({
@@ -84,17 +119,20 @@ export default function Edit({ attributes, setAttributes }) {
             <div {...blockProps}>
                 {showAllStations && (
                     <p>
-                        {allStations?.map((station) => (
+                        {allStations.map((station) => (
                             <span key={station.id}>{station.title.rendered}</span>
                         ))}
                     </p>
                 )}
 
-                {selectedStations.length > 0 && (
+                {selectedStations.length > 0 && !showAllStations && (
                     <p>
-                        {selectedStations?.map((station) => (
-                            <span key={station.id}>{station.title.rendered}</span>
-                        ))}
+                        {selectedStations.map((stationId) => {
+                            const station = allStations.find((s) => s.id === stationId);
+                            return station ? (
+                                <span key={station.id}>{station.title.rendered}</span>
+                            ) : null;
+                        })}
                     </p>
                 )}
 

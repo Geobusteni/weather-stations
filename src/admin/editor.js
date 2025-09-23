@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { TextControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
@@ -18,13 +18,14 @@ const LocationPanel = () => {
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     // Get post type and meta values
-    const { postType, address, latitude, longitude } = useSelect((select) => {
+    const { postType, address, latitude, longitude, isEditedMetaFieldValue } = useSelect((select) => {
         const { getCurrentPostType, getEditedPostAttribute } = select(editorStore);
         return {
             postType: getCurrentPostType(),
             address: getEditedPostAttribute('meta')?._kst_ws_address || '',
             latitude: getEditedPostAttribute('meta')?._kst_ws_latitude || '',
             longitude: getEditedPostAttribute('meta')?._kst_ws_longitude || '',
+            isEditedMetaFieldValue: getEditedPostAttribute('meta'),
         };
     }, []);
 
@@ -32,7 +33,7 @@ const LocationPanel = () => {
     const { editPost } = useDispatch(editorStore);
 
     // Only show panel for weather stations
-    if (postType !== 'weather_station') {
+    if (postType !== 'weather-station') {
         return null;
     }
 
@@ -86,13 +87,22 @@ const LocationPanel = () => {
 
     // Handle suggestion selection
     const handleSuggestionSelect = (suggestion) => {
+        const newMeta = {
+            _kst_ws_address: suggestion.text,
+            _kst_ws_longitude: suggestion.coordinates[0],
+            _kst_ws_latitude: suggestion.coordinates[1],
+        };
+
         editPost({
             meta: {
-                _kst_ws_address: suggestion.text,
-                _kst_ws_longitude: suggestion.coordinates[0],
-                _kst_ws_latitude: suggestion.coordinates[1],
-            },
+                ...isEditedMetaFieldValue,
+                ...newMeta
+            }
         });
+
+        // Force a dirty state
+        editPost({ modified: true });
+        
         setShowSuggestions(false);
         setSuggestions([]);
     };
@@ -100,6 +110,23 @@ const LocationPanel = () => {
     // Handle click outside suggestions
     const handleClickOutside = () => {
         setShowSuggestions(false);
+    };
+
+    // Handle field changes
+    const handleFieldChange = (field, value) => {
+        const newMeta = {
+            [field]: value
+        };
+
+        editPost({
+            meta: {
+                ...isEditedMetaFieldValue,
+                ...newMeta
+            }
+        });
+
+        // Force a dirty state
+        editPost({ modified: true });
     };
 
     return (
@@ -110,10 +137,12 @@ const LocationPanel = () => {
         >
             <div className="address-search-container">
                 <TextControl
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     label={__('Address', 'kst-weather-stations')}
                     value={address}
                     onChange={(value) => {
-                        editPost({ meta: { _kst_ws_address: value } });
+                        handleFieldChange('_kst_ws_address', value);
                         handleAddressSearch(value);
                     }}
                     onBlur={() => {
@@ -139,22 +168,22 @@ const LocationPanel = () => {
             </div>
             <div className="coordinates-group">
                 <TextControl
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     label={__('Latitude', 'kst-weather-stations')}
                     type="number"
                     step="any"
                     value={latitude}
-                    onChange={(value) =>
-                        editPost({ meta: { _kst_ws_latitude: parseFloat(value) } })
-                    }
+                    onChange={(value) => handleFieldChange('_kst_ws_latitude', parseFloat(value))}
                 />
                 <TextControl
+                    __next40pxDefaultSize
+                    __nextHasNoMarginBottom
                     label={__('Longitude', 'kst-weather-stations')}
                     type="number"
                     step="any"
                     value={longitude}
-                    onChange={(value) =>
-                        editPost({ meta: { _kst_ws_longitude: parseFloat(value) } })
-                    }
+                    onChange={(value) => handleFieldChange('_kst_ws_longitude', parseFloat(value))}
                 />
             </div>
             {error && <p className="error-message">{error}</p>}

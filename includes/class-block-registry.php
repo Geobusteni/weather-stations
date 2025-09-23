@@ -47,6 +47,7 @@ class BlockRegistry {
      */
     private function init(): void {
         \add_action('init', [$this, 'registerBlocks']);
+        \add_action('wp_enqueue_scripts', [$this, 'enqueueMapboxAssets']);
     }
 
     /**
@@ -65,84 +66,89 @@ class BlockRegistry {
     }
 
     /**
-     * Render the map block.
+     * Enqueue Mapbox assets.
      *
-     * @param array    $attributes Block attributes.
-     * @param string   $content    Block content.
-     * @param WP_Block $block      Block instance.
-     * @return string Rendered block output.
+     * @return void
      */
-    public function renderMapBlock(array $attributes, string $content, \WP_Block $block): string {
-        // Get settings
-        $settings = \get_option('kst-weather-stations', []);
-        
-        // Get block attributes with defaults
-        $title = $attributes['title'] ?? '';
-        $showAllStations = $attributes['showAllStations'] ?? true;
-        $selectedStations = $attributes['selectedStations'] ?? [];
-
-        // Get stations
-        $query_args = [
-            'post_type' => 'weather_station',
-            'posts_per_page' => -1,
-            'post_status' => 'publish',
-        ];
-
-        if (!$showAllStations && !empty($selectedStations)) {
-            $query_args['post__in'] = $selectedStations;
+    public function enqueueMapboxAssets(): void {
+        // Only enqueue if the current post/page contains our block
+        if (!\has_block('kst-weather-stations/map')) {
+            return;
         }
 
-        $stations = \get_posts($query_args);
+        \wp_enqueue_style(
+            'mapbox-gl',
+            'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css',
+            [],
+            '2.15.0'
+        );
 
-        // Start output buffering
-        \ob_start();
+        \wp_enqueue_script(
+            'mapbox-gl',
+            'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js',
+            [],
+            '2.15.0',
+            true
+        );
 
-        // Title
-        if (!empty($title)) {
-            echo '<h2 class="weather-stations-map-title">' . \esc_html($title) . '</h2>';
-        }
-
-        // Map container
-        echo '<div class="weather-stations-map-container" 
-            data-mapbox-token="' . \esc_attr($settings['mapbox-token'] ?? '') . '"
-            data-default-center="' . \esc_attr(\wp_json_encode($settings['mapbox-default-center'] ?? [])) . '"
-            data-default-zoom="' . \esc_attr($settings['mapbox-zoom'] ?? '9') . '"
-            data-theme="' . \esc_attr($settings['mapbox-theme'] ?? 'standard') . '"
-            data-stations="' . \esc_attr(\wp_json_encode($this->getStationsData($stations))) . '"
-        ></div>';
-
-        // Return the buffered content
-        return \ob_get_clean();
+        // Add dashicons for our markers
+        \wp_enqueue_style('dashicons');
     }
 
     /**
-     * Get formatted stations data for the map.
+     * Render the map block.
      *
-     * @param WP_Post[] $stations Array of station posts.
-     * @return array Formatted stations data.
+     * @param array    $attributes Block attributes.
+     *
+     * @return string Rendered block output.
      */
-    private function getStationsData(array $stations): array {
-        $data = [];
+    public function renderMapBlock(array $attributes): string {
+        // Get block attributes with defaults
+        $settings           = \get_option('kst-weather-stations');
+        $title             = $attributes['title'] ?? '';
+        $show_all_stations = $attributes['showAllStations'] ?? true;
+        $selected_stations = $attributes['selectedStations'] ?? [];
 
-        foreach ($stations as $station) {
-            $weather_data = \get_post_meta($station->ID, '_kst_ws_weather_data', true) ?: [];
-            $lat = \get_post_meta($station->ID, '_kst_ws_latitude', true);
-            $lng = \get_post_meta($station->ID, '_kst_ws_longitude', true);
+        // Get center coordinates from settings
+        $center = $settings['mapbox-default-center'] ?? [];
+        $lat = isset($center['lat']) ? (float) $center['lat'] : 44.4268; // Default to Bucharest
+        $lng = isset($center['lng']) ? (float) $center['lng'] : 26.1025;
 
-            if (empty($lat) || empty($lng)) {
-                continue;
-            }
+        $map_params = [
+            'class'      => 'weather-stations-map',
+            'style'      => 'height: 500px; width: 100%;', // Add explicit dimensions
+            'data-token' => $settings['mapbox-token'] ?? '',
+            'data-center-lat' => $lat,
+            'data-center-lng' => $lng,
+            'data-zoom' => $settings['mapbox-zoom'] ?? 16,
+            'data-theme' => $settings['mapbox-theme'] ?? 'standard',
+        ];
 
-            $data[] = [
-                'id' => $station->ID,
-                'title' => \get_the_title($station),
-                'lat' => (float) $lat,
-                'lng' => (float) $lng,
-                'weather' => $weather_data,
-                'lastUpdate' => \get_post_meta($station->ID, '_kst_ws_last_update', true),
-            ];
+        if ($show_all_stations) {
+            $selected_stations = \get_posts(
+                [
+                    'post_type'      => 'weather-station',
+                    'posts_per_page' => -1,
+                    'post_status'    => 'publish',
+                    'fields'         => 'ids',
+                    'order'          => 'ASC',
+                    'orderby'        => 'title',
+                ]
+            );
         }
 
-        return $data;
+        $map_params = \array_merge($map_params, [
+            'data-stations' => \implode(',', $selected_stations),
+        ]);
+
+        $wrapper_attributes = \get_block_wrapper_attributes($map_params);
+
+        $output = '';
+        if ($title) {
+            $output .= \sprintf('<h2 class="weather-stations-map-title">%s</h2>', \esc_html($title));
+        }
+        $output .= \sprintf('<div %s></div>', $wrapper_attributes);
+
+        return $output;
     }
 }

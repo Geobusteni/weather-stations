@@ -33,6 +33,9 @@ const VERSION = '1.0.0';
 define('KST\WeatherStations\URL', \plugin_dir_url(__FILE__));
 define('KST\WeatherStations\PATH', \plugin_dir_path(__FILE__));
 
+// Initiate de admin.
+Admin::getInstance();
+
 /**
  * Get instance of the Geocoding class.
  *
@@ -68,10 +71,9 @@ function init(): void {
     // Plugin backend.
     if (\is_admin()) {
         Settings::getInstance();
-        Admin::getInstance();
     }
 
-    // Register blocks
+	// Register blocks
     BlockRegistry::getInstance();
 }
 
@@ -80,44 +82,35 @@ function init(): void {
 
 // Register activation hook.
 \register_activation_hook(__FILE__, function() {
-	// Create the map page
-	$page_id = \wp_insert_post([
-		'post_title'   => \__('Weather Stations Map', 'kst-weather-stations'),
-		'post_content' => '<!-- wp:kst-weather-stations/map /-->',
-		'post_status'  => 'publish',
-		'post_type'    => 'page',
-	]);
+    // Create the map page
+    $page_id = \wp_insert_post([
+        'post_title'   => \__('Weather Stations Map', 'kst-weather-stations'),
+        'post_content' => '<!-- wp:kst-weather-stations/map /-->',
+        'post_status'  => 'publish',
+        'post_type'    => 'page',
+    ]);
 
-	if (!is_wp_error($page_id)) {
-		// Store the page ID in plugin settings
-		$settings = \get_option('kst-weather-stations', []);
-		$settings['map-page'] = $page_id;
-		\update_option('kst-weather-stations', $settings);
-	}
+    if (!is_wp_error($page_id)) {
+        // Store the page ID in plugin settings
+        $settings = \get_option('kst-weather-stations', []);
+        $settings['map-page'] = $page_id;
+        \update_option('kst-weather-stations', $settings);
+    }
 
-	// Register the custom post type to avoid 404s
-	\register_post_type('weather_station', [
-		'public' => true,
-		'has_archive' => true,
-		'show_in_rest' => true,
-		'supports' => ['title', 'editor', 'thumbnail'],
-		'rewrite' => ['slug' => 'weather-stations'],
-	]);
-
-	// Clear permalinks
-	\flush_rewrite_rules();
+    // Clear permalinks
+    \flush_rewrite_rules();
 });
 
 // Register deactivation hook.
 \register_deactivation_hook(__FILE__, function() {
-	// Clear any scheduled cron jobs
-	$timestamp = \wp_next_scheduled('kst_weather_stations_hourly_update');
-	if ($timestamp) {
-		\wp_unschedule_event($timestamp, 'kst_weather_stations_hourly_update');
-	}
+    // Clear any scheduled cron jobs
+    $timestamp = \wp_next_scheduled('kst_weather_stations_hourly_update');
+    if ($timestamp) {
+        \wp_unschedule_event($timestamp, 'kst_weather_stations_hourly_update');
+    }
 
-	// Clear permalinks
-	\flush_rewrite_rules();
+    // Clear permalinks
+    \flush_rewrite_rules();
 });
 
 // Add settings link on plugin page.

@@ -28,7 +28,7 @@ class Admin {
      *
      * @var string
      */
-    private const POST_TYPE = 'weather_station';
+    private const POST_TYPE = 'weather-station';
 
     /**
      * Meta keys for the weather station.
@@ -117,7 +117,7 @@ class Admin {
                 'public'              => true,
                 'has_archive'         => true,
                 'show_in_rest'        => true,
-                'supports'            => ['title', 'editor', 'thumbnail'],
+                'supports'            => ['title', 'editor', 'thumbnail', 'custom-fields'],
                 'menu_icon'           => 'dashicons-location',
                 'rewrite'             => ['slug' => 'weather-stations'],
                 'template'            => [
@@ -148,7 +148,7 @@ class Admin {
             'type' => 'number',
             'single' => true,
             'show_in_rest' => true,
-            'sanitize_callback' => 'floatval',
+            'sanitize_callback' => 'sanitize_text_field',
             'auth_callback' => function() {
                 return \current_user_can('edit_posts');
             },
@@ -158,7 +158,7 @@ class Admin {
             'type' => 'number',
             'single' => true,
             'show_in_rest' => true,
-            'sanitize_callback' => 'floatval',
+            'sanitize_callback' => 'sanitize_text_field',
             'auth_callback' => function() {
                 return \current_user_can('edit_posts');
             },
