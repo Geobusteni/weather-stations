@@ -220,8 +220,8 @@ class Admin {
         );
 
         \wp_localize_script('kst-weather-stations-editor-js', 'kstWeatherStations', [
-            'mapToken' => \get_option('kst_mapbox_token', ''),
-            'weatherToken' => \get_option('kst_weather_api_key', ''),
+            'mapToken' => \get_option('kst-weather-stations')['mapbox-token'] ?? '',
+            'weatherToken' => \get_option('kst-weather-stations')['data-token'] ?? '',
             'restNonce' => \wp_create_nonce('wp_rest'),
             'restUrl' => \rest_url('kst-weather-stations/v1'),
         ]);
