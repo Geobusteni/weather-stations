@@ -7,6 +7,7 @@ module.exports = {
     entry: {
         ...defaultConfig.entry,
         'admin/admin': path.resolve('src/admin/admin.js'),
+        'admin/editor': path.resolve('src/admin/editor.js'),
     },
     output: {
         ...defaultConfig.output,

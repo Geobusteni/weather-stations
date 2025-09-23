@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
 import { TextControl } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { registerPlugin } from '@wordpress/plugins';
 
