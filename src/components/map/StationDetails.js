@@ -6,7 +6,7 @@ import { Button, ToggleControl } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { Icon, starEmpty, starFilled } from '@wordpress/icons';
 
-const StationDetails = ({ station, onUnitChange }) => {
+const StationDetails = ({ station, onUnitChange, onShowSaved }) => {
     const [unit, setUnit] = useState('celsius');
     const [isFavorite, setIsFavorite] = useState(false);
 
@@ -48,27 +48,35 @@ const StationDetails = ({ station, onUnitChange }) => {
         return `${value} ${unit === 'celsius' ? 'm/s' : 'mph'}`;
     };
 
-    console.log(station);
-
     return (
         <div className="station-details">
             <div className="station-details-header">
+                <div className="header-controls">
+                    <Button
+                        className="unit-toggle"
+                        onClick={toggleUnit}
+                        variant="secondary"
+                        isSmall
+                    >
+                        {unit === 'celsius' ? '°C' : '°F'}
+                    </Button>
+                    <Button
+                        className="favorite-toggle"
+                        onClick={toggleFavorite}
+                        variant="secondary"
+                        isSmall
+                        icon={<Icon icon={isFavorite ? starFilled : starEmpty} />}
+                        label={__('Toggle favorite', 'kst-weather-stations')}
+                    />
+                </div>
                 <Button
-                    className="unit-toggle"
-                    onClick={toggleUnit}
+                    className="show-saved"
+                    onClick={onShowSaved}
                     variant="secondary"
                     isSmall
                 >
-                    {unit === 'celsius' ? '°C' : '°F'}
+                    {__('Saved Locations', 'kst-weather-stations')}
                 </Button>
-                <Button
-                    className="favorite-toggle"
-                    onClick={toggleFavorite}
-                    variant="secondary"
-                    isSmall
-                    icon={<Icon icon={isFavorite ? starFilled : starEmpty} />}
-                    label={__('Toggle favorite', 'kst-weather-stations')}
-                />
             </div>
 
             <h3>{station.title}</h3>

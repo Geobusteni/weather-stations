@@ -16,8 +16,6 @@ const normalizeWeatherData = (rawData) => {
         return null;
     }
 
-    console.log(rawData);
-
     return {
         conditions: {
             main: rawData.metric.weather?.main,

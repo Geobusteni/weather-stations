@@ -13,6 +13,7 @@ import mapboxgl from 'mapbox-gl';
  * Internal dependencies
  */
 import StationDetails from '../../components/map/StationDetails';
+import SavedLocations from '../../components/map/SavedLocations';
 import '../../components/map/style.scss';
 
 const WeatherStationsMap = ({ container, settings, stations }) => {
@@ -101,17 +102,25 @@ const WeatherStationsMap = ({ container, settings, stations }) => {
             popups[id].remove();
         });
 
-        // Show station details on click
-        el.addEventListener('click', () => {
+        // Function to show station details
+        const showStationDetails = (selectedStation) => {
             render(
                 <StationDetails
-                    station={station}
+                    station={selectedStation}
                     onUnitChange={() => {
                         // Re-render with new unit
+                        showStationDetails(selectedStation);
+                    }}
+                    onShowSaved={() => {
+                        // Show saved locations
                         render(
-                            <StationDetails
-                                station={station}
-                                onUnitChange={() => {}}
+                            <SavedLocations
+                                stations={stations}
+                                onStationSelect={(station) => {
+                                    showStationDetails(station);
+                                    map.panTo([station.lng, station.lat]);
+                                }}
+                                onBack={() => showStationDetails(selectedStation)}
                             />,
                             sidebarContainer
                         );
@@ -119,6 +128,11 @@ const WeatherStationsMap = ({ container, settings, stations }) => {
                 />,
                 sidebarContainer
             );
+        };
+
+        // Show station details on click
+        el.addEventListener('click', () => {
+            showStationDetails(station);
 
             // Just pan to the station, keeping current zoom level
             map.panTo([lng, lat]);

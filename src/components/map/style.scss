@@ -23,9 +23,14 @@
         .station-details {
             .station-details-header {
                 display: flex;
-                justify-content: space-between;
-                align-items: center;
+                flex-direction: column;
+                gap: 10px;
                 margin-bottom: 15px;
+
+                .header-controls {
+                    display: flex;
+                    gap: 8px;
+                }
 
                 .unit-toggle {
                     min-width: 40px;
@@ -36,10 +41,79 @@
 
                 .favorite-toggle {
                     color: #f1c40f;
-                    
+
                     &:hover {
                         color: #f39c12;
                     }
+                }
+
+                .show-saved {
+                    width: 100%;
+                    justify-content: center;
+                }
+            }
+
+            .saved-locations {
+                .saved-locations-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 15px;
+                    padding-bottom: 10px;
+                    border-bottom: 1px solid #eee;
+
+                    h3 {
+                        margin: 0;
+                        font-size: 16px;
+                        color: #2c3e50;
+                    }
+                }
+
+                .saved-locations-list {
+                    margin: 0;
+                    padding: 0;
+                    list-style: none;
+
+                    li {
+                        margin-bottom: 8px;
+
+                        .saved-location-item {
+                            width: 100%;
+                            text-align: left;
+                            padding: 10px;
+                            background: #f8f9fa;
+                            border: 1px solid #e9ecef;
+                            border-radius: 6px;
+                            transition: all 0.2s ease;
+
+                            &:hover {
+                                background: #e9ecef;
+                                transform: translateY(-1px);
+                            }
+
+                            h4 {
+                                margin: 0 0 5px;
+                                font-size: 14px;
+                                color: #2c3e50;
+                            }
+
+                            p {
+                                margin: 0;
+                                font-size: 12px;
+                                color: #7f8c8d;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .saved-locations-empty {
+                text-align: center;
+                padding: 20px 0;
+
+                p {
+                    margin: 0 0 15px;
+                    color: #7f8c8d;
                 }
             }
 
