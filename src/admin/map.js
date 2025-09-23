@@ -10,7 +10,6 @@ import { __ } from '@wordpress/i18n';
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
-import defaultMarker from "@mapbox/mapbox-gl-geocoder";
 
 // Making sure the language domain is set only once.
 const domainLng = 'kst-weather-stations';
@@ -56,23 +55,33 @@ document.addEventListener( 'DOMContentLoaded', () => {
     // Replace with your actual token (or localize from PHP)
     mapboxgl.accessToken = KSTWeatherStations.mapToken;
 
-    const map = new mapboxgl.Map( {
+    // Get saved values from localized data
+    const savedCenter = KSTWeatherStations?.defaultCenter || {};
+    const savedZoom = parseInt(KSTWeatherStations?.zoom || 9, 10);
+    const savedTheme = KSTWeatherStations?.theme === 'satellite' ? 'satellite-streets-v12' : 'streets-v12';
+
+    // Initialize map with saved values if available
+    const map = new mapboxgl.Map({
         container,
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [ 26.1025, 44.4268 ], // lng, lat (Bucharest example)
-        zoom: 10,
-    } );
+        style: `mapbox://styles/mapbox/${savedTheme}`,
+        zoom: savedZoom,
+        ...(savedCenter.lng && savedCenter.lat && {
+            center: [parseFloat(savedCenter.lng), parseFloat(savedCenter.lat)]
+        })
+    });
 
     let defaultMarker= null;
 
-    if ( latHolder.value.length > 0  && lngHolder.value.length > 0  ) {
-        const defaultMarker = new mapboxgl.Marker().setLngLat([parseFloat(lngHolder.value), parseFloat(latHolder.value)]);
-        defaultMarker.addTo(map);
+    // Set initial field values from saved data
+    if (savedCenter.lat && savedCenter.lng) {
+        // Add marker for saved location
+        defaultMarker = new mapboxgl.Marker()
+            .setLngLat([parseFloat(savedCenter.lng), parseFloat(savedCenter.lat)])
+            .addTo(map);
 
-        map.setCenter([parseFloat(lngHolder.value), parseFloat(latHolder.value)]);
-
-        if(geocodeField) {
-            reverseGeoCode(parseFloat(lngHolder.value), parseFloat(latHolder.value), KSTWeatherStations.mapToken, geocodeField);
+        // Always do reverse geocoding to get/update the address
+        if (geocodeField) {
+            reverseGeoCode(parseFloat(savedCenter.lng), parseFloat(savedCenter.lat), KSTWeatherStations.mapToken, geocodeField);
         }
     }
 
@@ -84,6 +93,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
     });
 
     geocoder.on('result', (result) => {
+        // Update coordinates
         if (latHolder) {
             latHolder.value = result.result.center[1];
         }
@@ -91,6 +101,21 @@ document.addEventListener( 'DOMContentLoaded', () => {
         if (lngHolder) {
             lngHolder.value = result.result.center[0];
         }
+
+        // Update address
+        const input = geocodeField.querySelector('input');
+
+        if (input) {
+            input.value = result.result.place_name;
+        }
+
+        // Update marker
+        if (defaultMarker) {
+            defaultMarker.remove();
+        }
+        defaultMarker = new mapboxgl.Marker()
+            .setLngLat(result.result.center)
+            .addTo(map);
 
     }).on('clear', () => {
         if (defaultMarker) {

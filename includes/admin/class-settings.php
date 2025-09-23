@@ -153,6 +153,13 @@ class Settings {
 				[
 					'mapToken' => $options['mapbox-token'] ?? '',
 					'dataToken' => $options['data-token'] ?? '',
+					'defaultCenter' => $options['mapbox-default-center'] ?? [
+						'address' => '',
+						'lat' => '',
+						'lng' => ''
+					],
+					'zoom' => $options['mapbox-zoom'] ?? '9',
+					'theme' => $options['mapbox-theme'] ?? 'standard'
 				]
 			);
 		}
@@ -309,16 +316,19 @@ class Settings {
 							'label'    => \esc_html__( 'Latitude', 'kst-weather-stations' ),
 							'type'     => 'text',
 							'readonly' => true,
-							'value'    => '',
 							'class'    => 'small-text widefat'
 						],
 						'lng' => [
 							'label'    => \esc_html__( 'Longitude', 'kst-weather-stations' ),
 							'type'     => 'text',
 							'readonly' => true,
-							'value'    => '',
 							'class'    => 'small-text widefat'
 						],
+					],
+					'value' => \get_option($this->setting_name)['mapbox-default-center'] ?? [
+						'address' => '',
+						'lat' => '',
+						'lng' => ''
 					]
 				]
 			]
