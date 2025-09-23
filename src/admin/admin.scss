@@ -1,0 +1,55 @@
+.kst-field-address-search {
+    .geocoder-container {
+        margin-bottom: 15px;
+
+        .mapboxgl-ctrl-geocoder {
+            width: 100%;
+            max-width: none;
+            box-shadow: none;
+            border: 1px solid #8c8f94;
+            border-radius: 4px;
+
+            &--input {
+                height: 36px;
+                padding: 6px 35px;
+            }
+
+            &--icon {
+                top: 8px;
+            }
+
+            &--button {
+                top: 4px;
+            }
+        }
+    }
+
+    .coordinates-group {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+
+        label {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+
+            span {
+                font-weight: 600;
+                color: #1e1e1e;
+            }
+
+            input {
+                width: 100%;
+            }
+        }
+    }
+
+    .map-container {
+        height: 300px;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid #8c8f94;
+    }
+}
