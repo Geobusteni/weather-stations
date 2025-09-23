@@ -92,17 +92,50 @@ function init(): void {
 
     if (!is_wp_error($page_id)) {
         // Store the page ID in plugin settings
-        $settings = \get_option('kst-weather-stations', []);
-        $settings['map-page'] = $page_id;
-        \update_option('kst-weather-stations', $settings);
+	    handle_map_page( $page_id );
     }
 
     // Clear permalinks
     \flush_rewrite_rules();
 });
 
+function handle_map_page( int $newId ): bool {
+	$settings = \get_option('kst-weather-stations', []);
+	$oldId = $settings['map-page'] ?? -1;
+
+	if ( $newId !== $oldId ) {
+		\delete_post_meta( $oldId, '_kst_ws_map_only', 1 );
+
+		\update_option('kst-weather-stations', $settings);
+
+		\update_post_meta( $newId, '_kst_ws_map_only', 1 );
+
+		return true;
+	}
+
+	return false;
+}
+
+add_action( 'update_option_kst-weather-stations', function( $old_value, $new_value ) {
+	$map_page = $new_value['map-page'] ?? -1;
+	$old_page = $old_value['map-page'] ?? -1;
+
+	if ( $map_page !== $old_page ) {
+		handle_map_page( $map_page ); // safe, won't loop
+	}
+}, 10, 2 );
+
 // Register deactivation hook.
 \register_deactivation_hook(__FILE__, function() {
+	$settings = \get_option('kst-weather-stations', []);
+	$map_page = $settings['map-page'] ?? -1;
+
+	\delete_post_meta( $map_page, '_kst_ws_map_only', 1 );
+
+	$settings['map-page'] = '';
+
+	\update_option('kst-weather-stations', $settings);
+
     // Clear any scheduled cron jobs
     $timestamp = \wp_next_scheduled('kst_weather_stations_hourly_update');
     if ($timestamp) {
@@ -135,3 +168,21 @@ function init(): void {
 
     return $links;
 });
+
+add_filter( 'template_include', function( $template ) {
+	if ( ! is_admin() && is_page() ) {
+		global $post;
+
+		// Replace with your page ID or meta key
+		if ( get_post_meta( $post->ID, '_kst_ws_map_only', true ) ) {
+			// Load plugin template instead of theme
+			$plugin_template = __DIR__ . '/templates/page-map-only.php';
+			if ( file_exists( $plugin_template ) ) {
+				return $plugin_template;
+			}
+		}
+	}
+
+	return $template;
+});
+

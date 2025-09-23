@@ -94,7 +94,7 @@ const Map = ({
             zoom: 16,
             essential: true,
         });
-        markers.current[station.id]?.showPopup();
+        // markers.current[station.id]?.showPopup();
     };
 
     return (
