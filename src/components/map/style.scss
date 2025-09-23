@@ -20,56 +20,105 @@
             color: #2c3e50;
         }
 
-        ul {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
+        .station-details {
+            .station-details-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
 
-        .weather-station-item {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
+                .unit-toggle {
+                    min-width: 40px;
+                    height: 30px;
+                    padding: 0 8px;
+                    justify-content: center;
+                }
 
-            &:hover {
-                background: #e9ecef;
-                transform: translateY(-1px);
+                .favorite-toggle {
+                    color: #f1c40f;
+                    
+                    &:hover {
+                        color: #f39c12;
+                    }
+                }
             }
 
-            h4 {
-                margin: 0 0 5px;
-                font-size: 14px;
+            h3 {
+                margin: 0 0 8px;
+                font-size: 18px;
                 color: #2c3e50;
             }
 
-            .weather-station-item-info {
-                display: flex;
-                align-items: center;
-                gap: 10px;
+            .station-address {
+                margin: 0 0 15px;
+                font-size: 14px;
+                color: #7f8c8d;
+            }
 
-                .temperature {
-                    font-size: 13px;
-                    color: #666;
+            .weather-info {
+                .weather-conditions {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 15px;
+                    padding-bottom: 15px;
+                    border-bottom: 1px solid #eee;
+
+                    img {
+                        width: 50px;
+                        height: 50px;
+                        margin-right: 10px;
+                    }
+
+                    span {
+                        font-size: 16px;
+                        font-weight: 500;
+                        color: #2c3e50;
+                    }
+
+                    small {
+                        display: block;
+                        color: #7f8c8d;
+                        font-size: 12px;
+                    }
                 }
 
-                img {
-                    width: 30px;
-                    height: 30px;
+                .weather-data {
+                    .data-row {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 8px;
+                        font-size: 14px;
+
+                        strong {
+                            color: #2c3e50;
+                        }
+
+                        span {
+                            color: #34495e;
+                        }
+
+                        &.feels-like {
+                            margin-left: 15px;
+                            color: #7f8c8d;
+                            font-size: 13px;
+                        }
+                    }
+                }
+
+                .last-update {
+                    margin-top: 15px;
+                    padding-top: 10px;
+                    border-top: 1px solid #eee;
+                    text-align: center;
+
+                    small {
+                        color: #95a5a6;
+                        font-size: 12px;
+                    }
                 }
             }
         }
-    }
-
-    .weather-stations-list-empty {
-        padding: 20px;
-        text-align: center;
-        color: #666;
     }
 
     .weather-stations-map-container {
@@ -77,6 +126,7 @@
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        height: 500px;
     }
 }
 
@@ -99,53 +149,10 @@
             transform: scale(1.2);
         }
     }
-}
 
-.weather-station-popup {
-    h3 {
-        margin: 0 0 10px;
-        font-size: 16px;
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .weather-info {
-        p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #34495e;
-
-            strong {
-                color: #2c3e50;
-            }
+    &.is-favorite {
+        .dashicons {
+            color: #f1c40f;
         }
-
-        img {
-            margin-top: 5px;
-            display: block;
-        }
-    }
-
-    .weather-update {
-        margin-top: 10px;
-        font-size: 12px;
-        color: #7f8c8d;
-    }
-}
-
-.mapboxgl-popup-content {
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.mapboxgl-popup-close-button {
-    font-size: 16px;
-    color: #7f8c8d;
-    padding: 5px;
-
-    &:hover {
-        color: #34495e;
-        background: none;
     }
 }
