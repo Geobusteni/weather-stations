@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "wp-scripts build",
+    "build:blocks": "wp-scripts build",
+    "build:admin": "wp-scripts build --config=webpack.admin.config.js",
+    "build": "npm run build:blocks && npm run build:admin",
     "start": "wp-scripts start",
     "lint": "wp-scripts format"
   },

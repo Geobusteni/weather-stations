@@ -209,13 +209,13 @@ class Admin {
      * @return void
      */
     public function enqueueEditorAssets(): void {
-        $asset_file = include \KST\WeatherStations\PATH . 'build/admin/assets.php';
+        $asset_file = include \KST\WeatherStations\PATH . 'build-admin/admin/assets.php';
 
         \wp_enqueue_script(
             'kst-weather-stations-editor-js',
-            \KST\WeatherStations\URL . 'build/admin/editor.js',
+            \KST\WeatherStations\URL . 'build-admin/admin/editor.js',
             $asset_file['dependencies'] ?? [],
-            $asset_file['version'] ?? \filemtime(\KST\WeatherStations\URL . 'build/admin/editor.js'),
+            $asset_file['version'] ?? \filemtime(\KST\WeatherStations\URL . 'build-admin/admin/editor.js'),
             true
         );
 
@@ -228,9 +228,9 @@ class Admin {
 
         \wp_enqueue_style(
             'kst-weather-stations-editor-css',
-            \KST\WeatherStations\URL . 'build/admin/editor.css',
+            \KST\WeatherStations\URL . 'build-admin/admin/editor.css',
             [],
-            $asset_file['version'] ?? \filemtime(\KST\WeatherStations\URL . 'build/admin/editor.css')
+            $asset_file['version'] ?? \filemtime(\KST\WeatherStations\URL . 'build-admin/admin/editor.css')
         );
     }
 
@@ -399,7 +399,7 @@ class Admin {
         // Check if update is needed based on global interval setting
         $last_update = \get_post_meta($post_id, self::META_KEYS['last_update'], true);
         $interval = \get_option('kst-weather-stations')['data-interval'] ?? 1; // Default to 1 hour
-        
+
         if ($last_update) {
             $next_update = \strtotime($last_update) + ($interval * HOUR_IN_SECONDS);
             if (\time() < $next_update) {

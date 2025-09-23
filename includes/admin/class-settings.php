@@ -101,12 +101,12 @@ class Settings {
 	}
 
 	public function register_scripts(): void {
-		if ( file_exists( PATH . 'build/admin.assets.php' ) ) {
-			$assets = include PATH . 'build/admin/assets.php';
+		if ( file_exists( PATH . 'build-admin/admin.assets.php' ) ) {
+			$assets = include PATH . 'build-admin/admin/assets.php';
 		}
 
-		$url = \trailingslashit( URL  ). 'build/admin';
-		$path = \trailingslashit( PATH ) . 'build/admin';
+		$url = \trailingslashit( URL  ). 'build-admin/admin';
+		$path = \trailingslashit( PATH ) . 'build-admin/admin';
 
 		\wp_register_script(
 			$this->setting_name . 'admin-js',
