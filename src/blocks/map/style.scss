@@ -5,6 +5,7 @@
   font-family: 'Roboto', sans-serif;
   font-size: 12px;
   height: 100vh;
+  line-height: 1.5;
   overflow: hidden;
   width: 100vw;
 
@@ -19,10 +20,20 @@
 
 .weather-station-overlay {
   background: linear-gradient(to bottom, var(--color-bg) 0, var(--color-bg) 100vh, transparent);
+  display: flex;
   height: 150vh;
+  justify-content: center;
   margin-bottom: -50vh;
   position: relative;
   z-index: 2;
+
+  & .weather-stations-map-title {
+    color: var(--color-text);
+    font-size: var(--hero-size);
+    font-weight: 600;
+    position: relative;
+    top: 35vh;
+  }
 }
 
 .weather-stations-map-content {
@@ -47,6 +58,10 @@
 
     .my-locations-button {
       display: none;
+
+      &.active {
+        display: none;
+      }
     }
 
     .close-saved-button {

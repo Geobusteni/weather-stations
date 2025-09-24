@@ -262,8 +262,9 @@ class WeatherStationsMap {
                 stationItem.classList.add('active');
             }
 
-            // Show map but keep saved view active
+            // Show map and reset view to normal
             this.container.style.display = 'block';
+            this.wrapper.classList.remove('expanded-view');
         } else {
             // In normal view, update the weather info section
             this.weatherInfo.querySelector('.station-name').textContent = station.title;
