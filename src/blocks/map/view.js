@@ -97,14 +97,23 @@ class WeatherStationsMap {
     }
 
     initControls() {
-        // Unit toggle
-        const unitToggle = this.wrapper.querySelector('.unit-toggle');
-        unitToggle.addEventListener('click', () => {
-            this.currentUnit = this.currentUnit === 'celsius' ? 'fahrenheit' : 'celsius';
-            unitToggle.textContent = this.currentUnit === 'celsius' ? '°C' : '°F';
-            if (this.activeStation) {
-                this.showStationDetails(this.activeStation);
-            }
+        // Unit toggles
+        const unitToggles = this.wrapper.querySelectorAll('.unit-toggle');
+        unitToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const unit = toggle.dataset.unit;
+                if (unit === this.currentUnit) return;
+
+                // Update active class
+                unitToggles.forEach(btn => btn.classList.remove('active'));
+                toggle.classList.add('active');
+
+                // Update unit and refresh display
+                this.currentUnit = unit;
+                if (this.activeStation) {
+                    this.showStationDetails(this.activeStation, this.wrapper.classList.contains('show-saved'));
+                }
+            });
         });
 
         // Show saved stations

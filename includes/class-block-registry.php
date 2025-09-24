@@ -150,7 +150,8 @@ class BlockRegistry {
                 <div class="weather-stations-map-content">
                     <div class="weather-stations-sidebar">
                         <div class="sidebar-controls">
-                            <button class="unit-toggle" data-unit="celsius">°C</button>
+                            <button class="unit-toggle active" data-unit="celsius">°C</button>
+                            <button class="unit-toggle" data-unit="fahrenheit">°F</button>
                             <button class="show-saved-button">%s</button>
                         </div>
                         <div class="station-info">
