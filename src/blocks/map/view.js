@@ -35,6 +35,9 @@ class WeatherStationsMap {
         this.initMap();
         this.initControls();
         this.initOverlay();
+
+        // Show initial empty message
+        this.showEmptyMessage();
     }
 
     initMap() {
@@ -244,7 +247,8 @@ class WeatherStationsMap {
             myLocationsButton.classList.remove('active');
         }
 
-        // Update weather data
+        // Hide empty message and update weather data
+        this.hideEmptyMessage();
         const weatherData = this.formatWeatherData(station.weather);
 
         if (fromSavedView) {
@@ -320,11 +324,12 @@ class WeatherStationsMap {
         this.wrapper.querySelector('.save-station-button').classList.remove('saved');
         this.wrapper.querySelector('.my-locations-button').classList.remove('active');
 
-        // Clear active station
+        // Clear active station and saved stations list
         this.activeStation = null;
-
-        // Clear saved stations list
         this.savedStationsList.innerHTML = '';
+
+        // Show empty message when returning to normal view
+        this.showEmptyMessage();
 
         // Create bounds that will include all stations and default center
         const bounds = new mapboxgl.LngLatBounds();
@@ -368,6 +373,31 @@ class WeatherStationsMap {
             // Reset save button state
             const saveButton = this.wrapper.querySelector('.save-station-button');
             saveButton.classList.remove('saved');
+
+            // Show empty message
+            this.showEmptyMessage();
+        }
+    }
+
+    showEmptyMessage() {
+        const emptyMessage = this.sidebar.dataset.emptyMessage;
+        if (!emptyMessage) return;
+
+        // Create or update message element
+        let messageEl = this.sidebar.querySelector('.empty-message');
+        if (!messageEl) {
+            messageEl = document.createElement('div');
+            messageEl.className = 'empty-message';
+            this.sidebar.appendChild(messageEl);
+        }
+        messageEl.textContent = emptyMessage;
+        messageEl.style.display = 'block';
+    }
+
+    hideEmptyMessage() {
+        const messageEl = this.sidebar.querySelector('.empty-message');
+        if (messageEl) {
+            messageEl.style.display = 'none';
         }
     }
 

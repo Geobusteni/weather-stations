@@ -92,6 +92,7 @@
   flex-direction: column;
   max-width: 300px;
   padding: calc(var(--spacing-15) * 2);
+  position: relative;
 
   & button {
     background: transparent;
@@ -170,6 +171,15 @@
   .station-address {
     margin-bottom: var(--spacing-10);
   }
+
+  .empty-message {
+    left: 0;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+  }
 }
 
 .weather-stations-list {
@@ -214,27 +224,22 @@
 
 // Map markers and popups
 .weather-station-marker {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  .dashicons {
-    color: #e74c3c;
-    font-size: 24px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease;
-
-    &:hover {
-      transform: scale(1.2);
+  &.is-favorite {
+    & svg {
+      color: var(--color-black);
     }
   }
 
-  &.is-favorite {
-    .dashicons {
-      color: #f1c40f;
-    }
+  & svg {
+    color: var(--color-bg);
+    width: 100%;
+    height: 100%;
   }
 }

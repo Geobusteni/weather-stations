@@ -148,7 +148,7 @@ class BlockRegistry {
 			'<div class="weather-stations-map-wrapper">
                 <div class="weather-station-overlay">%s</div>
                 <div class="weather-stations-map-content">
-                    <div class="weather-stations-sidebar">
+                    <div class="weather-stations-sidebar" data-empty-message="%s">
                         <div class="sidebar-header">
                             <div class="sidebar-controls">
                                 <div class="sidebar-temperature-toggle">
@@ -178,6 +178,7 @@ class BlockRegistry {
                 </div>
             </div>',
 			$title_html,
+            \__('Click on the map to get weather data', 'kst-weather-stations'),
 			\__('Celsius', 'kst-weather-stations'),
 			\__('Fahrenheit', 'kst-weather-stations'),
             \__('My Locations', 'kst-weather-stations'),
