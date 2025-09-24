@@ -14,7 +14,6 @@ import mapboxgl from 'mapbox-gl';
  */
 import StationDetails from '../../components/map/StationDetails';
 import SavedLocations from '../../components/map/SavedLocations';
-import '../../components/map/style.scss';
 
 const WeatherStationsMap = ({ container, settings, stations }) => {
     const { token, centerLat, centerLng, zoom, theme } = settings;
@@ -26,10 +25,15 @@ const WeatherStationsMap = ({ container, settings, stations }) => {
         style: `mapbox://styles/mapbox/${theme === 'satellite' ? 'satellite-streets-v12' : 'streets-v12'}`,
         center: [centerLng, centerLat],
         zoom: zoom,
+        scrollZoom: false, // Disable scroll zooming
     });
 
-    // Add navigation controls
-    map.addControl(new mapboxgl.NavigationControl());
+    // Add navigation controls with all controls enabled
+    map.addControl(new mapboxgl.NavigationControl({
+        showCompass: true,
+        showZoom: true,
+        visualizePitch: true
+    }));
 
     // Create bounds that will include all stations and default center
     const bounds = new mapboxgl.LngLatBounds();
