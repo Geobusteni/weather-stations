@@ -158,6 +158,7 @@ class WeatherStationsMap {
         const myLocationsButton = this.wrapper.querySelector('.my-locations-button');
 
         myLocationsButton.addEventListener('click', () => {
+            myLocationsButton.classList.remove('active');
             this.showSavedStations();
         });
 
@@ -304,6 +305,10 @@ class WeatherStationsMap {
         this.container.style.display = 'block';
         this.savedStations.style.display = 'none';
         this.weatherInfo.style.display = 'none';
+
+        // Reset button states
+        this.wrapper.querySelector('.save-station-button').classList.remove('saved');
+        this.wrapper.querySelector('.my-locations-button').classList.remove('active');
 
         // Clear active station
         this.activeStation = null;
