@@ -1,166 +1,272 @@
 /**
- * WordPress dependencies
- */
-import { render } from '@wordpress/element';
-import domReady from '@wordpress/dom-ready';
-
-/**
  * External dependencies
  */
 import mapboxgl from 'mapbox-gl';
 
-/**
- * Internal dependencies
- */
-import StationDetails from '../../components/map/StationDetails';
-import SavedLocations from '../../components/map/SavedLocations';
+// SVG icon for the marker
+const markerSvg = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+</svg>
+`;
 
-const WeatherStationsMap = ({ container, settings, stations }) => {
-    const { token, centerLat, centerLng, zoom, theme } = settings;
+class WeatherStationsMap {
+    constructor(container, settings, stations) {
+        this.container = container;
+        this.settings = settings;
+        this.stations = stations;
+        this.markers = {};
+        this.currentUnit = 'celsius';
+        this.activeStation = null;
 
-    // Initialize map
-    mapboxgl.accessToken = token;
-    const map = new mapboxgl.Map({
-        container,
-        style: `mapbox://styles/mapbox/${theme === 'satellite' ? 'satellite-streets-v12' : 'streets-v12'}`,
-        center: [centerLng, centerLat],
-        zoom: zoom,
-        scrollZoom: false, // Disable scroll zooming
-    });
+        // Find UI elements
+        this.wrapper = container.closest('.weather-stations-map-wrapper');
+        this.sidebar = this.wrapper.querySelector('.weather-stations-sidebar');
+        this.weatherInfo = this.wrapper.querySelector('.weather-info');
+        this.savedStations = this.wrapper.querySelector('.saved-stations');
+        this.savedStationsList = this.wrapper.querySelector('.saved-stations-list');
 
-    // Add navigation controls with all controls enabled
-    map.addControl(new mapboxgl.NavigationControl({
-        showCompass: true,
-        showZoom: true,
-        visualizePitch: true
-    }));
-
-    // Create bounds that will include all stations and default center
-    const bounds = new mapboxgl.LngLatBounds();
-
-    // Add default center to bounds
-    if (centerLng && centerLat) {
-        bounds.extend([centerLng, centerLat]);
+        // Initialize map
+        this.initMap();
+        this.initControls();
+        this.initOverlay();
     }
 
-    // Add all stations to bounds
-    stations.forEach(station => {
-        if (station.lat && station.lng) {
-            bounds.extend([station.lng, station.lat]);
+    initMap() {
+        const { token, centerLat, centerLng, zoom, theme } = this.settings;
+        mapboxgl.accessToken = token;
+
+        this.map = new mapboxgl.Map({
+            container: this.container,
+            style: `mapbox://styles/mapbox/${theme === 'satellite' ? 'satellite-streets-v12' : 'streets-v12'}`,
+            center: [centerLng, centerLat],
+            zoom: zoom,
+            scrollZoom: false,
+        });
+
+        this.map.addControl(new mapboxgl.NavigationControl({
+            showCompass: true,
+            showZoom: true,
+            visualizePitch: true
+        }));
+
+        // Add markers and fit bounds
+        this.addMarkersAndFitBounds();
+    }
+
+    addMarkersAndFitBounds() {
+        const bounds = new mapboxgl.LngLatBounds();
+        const { centerLat, centerLng } = this.settings;
+
+        // Add default center to bounds
+        if (centerLng && centerLat) {
+            bounds.extend([centerLng, centerLat]);
         }
-    });
 
-    // Fit map to bounds if we have any points
-    if (!bounds.isEmpty()) {
-        map.fitBounds(bounds, {
-            padding: 50,
-            maxZoom: zoom || 16 // Use provided zoom as maximum, or default to 16
-        });
-    }
+        // Get favorites from localStorage
+        const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
 
-    // Create sidebar container
-    const sidebarContainer = document.createElement('div');
-    sidebarContainer.className = 'weather-stations-list';
-    container.parentNode.insertBefore(sidebarContainer, container);
+        this.stations.forEach(station => {
+            const { id, lat, lng } = station;
+            if (!lat || !lng) return;
 
-    // Create wrapper
-    const wrapper = document.createElement('div');
-    wrapper.className = 'weather-stations-map-wrapper';
-    container.parentNode.insertBefore(wrapper, container);
-    wrapper.appendChild(sidebarContainer);
-    wrapper.appendChild(container);
+            // Add to bounds
+            bounds.extend([lng, lat]);
 
-    // Add markers for stations
-    const markers = {};
-    const popups = {};
-    const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
+            // Create marker
+            const el = document.createElement('div');
+            el.className = `weather-station-marker${favorites.includes(id) ? ' is-favorite' : ''}`;
+            el.innerHTML = markerSvg;
 
-    stations.forEach(station => {
-        const { id, lat, lng } = station;
-        if (!lat || !lng) return;
+            // Add click handler
+            el.addEventListener('click', () => this.showStationDetails(station));
 
-        // Create marker element
-        const el = document.createElement('div');
-        el.className = `weather-station-marker${favorites.includes(id) ? ' is-favorite' : ''}`;
-        el.innerHTML = '<span class="dashicons dashicons-location"></span>';
-
-        // Create marker
-        markers[id] = new mapboxgl.Marker(el)
-            .setLngLat([lng, lat])
-            .addTo(map);
-
-        // Create popup
-        popups[id] = new mapboxgl.Popup({
-            offset: 25,
-            closeButton: false,
-            closeOnClick: false,
-        })
-            .setHTML(`<h3>${station.title}</h3>`);
-
-        // Show popup on hover
-        el.addEventListener('mouseenter', () => {
-            popups[id].addTo(map);
+            // Add marker to map
+            this.markers[id] = new mapboxgl.Marker(el)
+                .setLngLat([lng, lat])
+                .addTo(this.map);
         });
 
-        el.addEventListener('mouseleave', () => {
-            popups[id].remove();
-        });
-
-        // Function to show station details
-        const showStationDetails = (selectedStation) => {
-            render(
-                <StationDetails
-                    station={selectedStation}
-                    onUnitChange={() => {
-                        // Re-render with new unit
-                        showStationDetails(selectedStation);
-                    }}
-                    onShowSaved={() => {
-                        // Show saved locations
-                        render(
-                            <SavedLocations
-                                stations={stations}
-                                onStationSelect={(station) => {
-                                    showStationDetails(station);
-                                    map.panTo([station.lng, station.lat]);
-                                }}
-                                onBack={() => showStationDetails(selectedStation)}
-                            />,
-                            sidebarContainer
-                        );
-                    }}
-                />,
-                sidebarContainer
-            );
-        };
-
-        // Show station details on click
-        el.addEventListener('click', () => {
-            showStationDetails(station);
-
-            // Just pan to the station, keeping current zoom level
-            map.panTo([lng, lat]);
-        });
-    });
-
-    // Map is already fitted to bounds including default center and all stations
-
-    // Update markers when favorites change
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'kst_favorite_stations') {
-            const newFavorites = JSON.parse(e.newValue || '[]');
-            stations.forEach(({ id }) => {
-                const marker = markers[id];
-                if (marker) {
-                    const el = marker.getElement();
-                    el.className = `weather-station-marker${newFavorites.includes(id) ? ' is-favorite' : ''}`;
-                }
+        // Fit bounds if we have points
+        if (!bounds.isEmpty()) {
+            this.map.fitBounds(bounds, {
+                padding: 50,
+                maxZoom: this.settings.zoom || 16
             });
         }
-    });
-};
+    }
 
-domReady(() => {
+    initControls() {
+        // Unit toggle
+        const unitToggle = this.wrapper.querySelector('.unit-toggle');
+        unitToggle.addEventListener('click', () => {
+            this.currentUnit = this.currentUnit === 'celsius' ? 'fahrenheit' : 'celsius';
+            unitToggle.textContent = this.currentUnit === 'celsius' ? '°C' : '°F';
+            if (this.activeStation) {
+                this.showStationDetails(this.activeStation);
+            }
+        });
+
+        // Show saved stations
+        const showSavedButton = this.wrapper.querySelector('.show-saved-button');
+        showSavedButton.addEventListener('click', () => this.showSavedStations());
+
+        // Close saved stations
+        const closeSavedButton = this.wrapper.querySelector('.close-saved-button');
+        closeSavedButton.addEventListener('click', () => this.hideSavedStations());
+
+        // Handle favorites changes
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'kst_favorite_stations') {
+                this.updateMarkerFavorites(JSON.parse(e.newValue || '[]'));
+            }
+        });
+    }
+
+    initOverlay() {
+        const overlay = this.wrapper.querySelector('.weather-station-overlay');
+        if (!overlay) return;
+
+        let hasFaded = false;
+        const fadeHeight = 500; // Height at which overlay starts to fade
+
+        const handleScroll = () => {
+            if (hasFaded) return;
+
+            requestAnimationFrame(() => {
+                const scrollTop = this.wrapper.scrollTop;
+                if (scrollTop >= fadeHeight) {
+                    hasFaded = true;
+                    overlay.style.opacity = '0';
+                    overlay.style.transition = 'opacity 0.3s ease-out';
+                    
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    }, 300);
+                }
+            });
+        };
+
+        this.wrapper.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
+    showStationDetails(station) {
+        this.activeStation = station;
+        this.wrapper.classList.remove('show-saved');
+        this.container.style.display = 'block';
+        this.savedStations.style.display = 'none';
+        this.weatherInfo.style.display = 'block';
+
+        // Update station info
+        this.weatherInfo.querySelector('.station-name').textContent = station.title;
+        this.weatherInfo.querySelector('.station-address').textContent = station.address;
+
+        // Update weather data
+        const weatherData = this.weatherInfo.querySelector('.weather-data');
+        weatherData.innerHTML = this.formatWeatherData(station.weather);
+
+        // Center map on station
+        this.map.panTo([station.lng, station.lat]);
+    }
+
+    showSavedStations() {
+        const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
+        const savedStations = this.stations.filter(station => favorites.includes(station.id));
+
+        this.savedStationsList.innerHTML = savedStations.map(station => `
+            <div class="saved-station-item" data-id="${station.id}">
+                <h4>${station.title}</h4>
+                <p>${station.address}</p>
+            </div>
+        `).join('');
+
+        // Add click handlers
+        this.savedStationsList.querySelectorAll('.saved-station-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const station = this.stations.find(s => s.id === parseInt(item.dataset.id));
+                if (station) {
+                    this.showStationDetails(station);
+                }
+            });
+        });
+
+        this.wrapper.classList.add('show-saved');
+        this.container.style.display = 'none';
+        this.weatherInfo.style.display = 'none';
+        this.savedStations.style.display = 'block';
+    }
+
+    hideSavedStations() {
+        this.wrapper.classList.remove('show-saved');
+        this.container.style.display = 'block';
+        this.savedStations.style.display = 'none';
+        if (this.activeStation) {
+            this.weatherInfo.style.display = 'block';
+        }
+    }
+
+    updateMarkerFavorites(favorites) {
+        Object.entries(this.markers).forEach(([id, marker]) => {
+            const el = marker.getElement();
+            el.className = `weather-station-marker${favorites.includes(parseInt(id)) ? ' is-favorite' : ''}`;
+        });
+    }
+
+    formatWeatherData(weather) {
+        if (!weather) return '';
+
+        const temp = this.currentUnit === 'celsius' ? weather.temperature.celsius : weather.temperature.fahrenheit;
+        const feelsLike = this.currentUnit === 'celsius' ? weather.feelsLike.celsius : weather.feelsLike.fahrenheit;
+        const windSpeed = this.currentUnit === 'celsius' ? weather.windSpeed.metric : weather.windSpeed.imperial;
+        const unit = this.currentUnit === 'celsius' ? '°C' : '°F';
+        const speedUnit = this.currentUnit === 'celsius' ? 'm/s' : 'mph';
+
+        return `
+            <div class="weather-conditions">
+                ${weather.conditions.icon ? `
+                    <img src="https://openweathermap.org/img/w/${weather.conditions.icon}.png" 
+                         alt="${weather.conditions.description || ''}" />
+                ` : ''}
+                <div>
+                    <span>${weather.conditions.main}</span>
+                    <small>${weather.conditions.description}</small>
+                </div>
+            </div>
+            <div class="weather-data">
+                <div class="data-row">
+                    <strong>Temperature:</strong>
+                    <span>${temp}${unit}</span>
+                </div>
+                <div class="data-row feels-like">
+                    <strong>Feels like:</strong>
+                    <span>${feelsLike}${unit}</span>
+                </div>
+                <div class="data-row">
+                    <strong>Humidity:</strong>
+                    <span>${weather.humidity}%</span>
+                </div>
+                <div class="data-row">
+                    <strong>Wind Speed:</strong>
+                    <span>${windSpeed} ${speedUnit}</span>
+                </div>
+                <div class="data-row">
+                    <strong>Wind Direction:</strong>
+                    <span>${weather.windDirection}°</span>
+                </div>
+            </div>
+            ${weather.lastUpdate ? `
+                <div class="last-update">
+                    <small>Last updated: ${new Date(weather.lastUpdate).toLocaleString()}</small>
+                </div>
+            ` : ''}
+        `;
+    }
+}
+
+// Initialize maps when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
     const mapContainers = document.querySelectorAll('.weather-stations-map');
 
     mapContainers.forEach(container => {
@@ -210,12 +316,14 @@ domReady(() => {
                     },
                 }));
 
-                // Initialize map component
-                WeatherStationsMap({
-                    container,
-                    settings: { token, centerLat, centerLng, zoom, theme },
-                    stations: stationsData,
-                });
+                // Initialize map
+                new WeatherStationsMap(container, {
+                    token,
+                    centerLat,
+                    centerLng,
+                    zoom,
+                    theme
+                }, stationsData);
             })
             .catch(error => {
                 console.error('Error fetching weather stations:', error);

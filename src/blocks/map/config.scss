@@ -1,0 +1,14 @@
+.weather-stations-map-wrapper {
+  // Layout spacing variables
+  --spacing-5: calc( var(--spacing-10) / 2);
+  --spacing-10: 10px;
+  --spacing-15: calc( var(--spacing-5) * 3);
+  --spacing-20: calc( var(--spacing-10) * 2);
+  --spacing-50: calc( (var(--spacing-10) * 5) );
+
+  // Colors
+  --color-bg: #28282C;
+  --color-text-alt: #757575;
+  --color-text: #EEEEEE;
+
+}

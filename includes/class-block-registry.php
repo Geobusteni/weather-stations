@@ -116,7 +116,6 @@ class BlockRegistry {
 
         $map_params = [
             'class'      => 'weather-stations-map',
-            'style'      => 'height: 500px; width: 100%;', // Add explicit dimensions
             'data-token' => $settings['mapbox-token'] ?? '',
             'data-center-lat' => $lat,
             'data-center-lng' => $lng,
@@ -143,12 +142,36 @@ class BlockRegistry {
 
         $wrapper_attributes = \get_block_wrapper_attributes($map_params);
 
-        $output = '';
-        if ($title) {
-            $output .= \sprintf('<h2 class="weather-stations-map-title">%s</h2>', \esc_html($title));
-        }
-        $output .= \sprintf('<div %s></div>', $wrapper_attributes);
-
-        return $output;
+		$title_html = $title ? \sprintf('<h2 class="weather-stations-map-title">%s</h2>', \esc_html($title)) : '';
+        $button_text = \__('Show Saved Locations', 'kst-weather-stations');
+        return \sprintf(
+			'<div class="weather-stations-map-wrapper">
+                <div class="weather-station-overlay">%s</div>
+                <div class="weather-stations-map-content">
+                    <div class="weather-stations-sidebar">
+                        <div class="sidebar-controls">
+                            <button class="unit-toggle" data-unit="celsius">°C</button>
+                            <button class="show-saved-button">%s</button>
+                        </div>
+                        <div class="station-info">
+                            <div class="weather-info" style="display: none;">
+                                <h3 class="station-name"></h3>
+                                <p class="station-address"></p>
+                                <div class="weather-data"></div>
+                            </div>
+                            <div class="saved-stations" style="display: none;">
+                                <div class="saved-stations-list"></div>
+                                <button class="close-saved-button">%s</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div %s></div>
+                </div>
+            </div>',
+			$title_html,
+            \__('Show Saved Locations', 'kst-weather-stations'),
+            \__('Close', 'kst-weather-stations'),
+			$wrapper_attributes
+        );
     }
 }

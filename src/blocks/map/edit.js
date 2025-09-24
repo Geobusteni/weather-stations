@@ -6,6 +6,7 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { RichText } from "@wordpress/block-editor";
 
 /**
  * Internal dependencies.
@@ -13,7 +14,7 @@ import apiFetch from '@wordpress/api-fetch';
 import './editor.scss';
 
 export default function Edit({ attributes, setAttributes }) {
-    const { selectedStations = [], showAllStations } = attributes;
+    const { title, selectedStations = [], showAllStations } = attributes;
     const blockProps = useBlockProps({
         className: 'weather-stations-map',
     });
@@ -117,6 +118,12 @@ export default function Edit({ attributes, setAttributes }) {
             </InspectorControls>
 
             <div {...blockProps}>
+                <RichText
+                    tagName="h2"
+                    placeholder={__('Write a title ... ', 'weather-stations-map')}
+                    value={title}
+                    onChange={(newTitle) => setAttributes({ title: newTitle })}
+                />
                 {showAllStations && (
                     <p>
                         {allStations.map((station) => (
@@ -143,3 +150,4 @@ export default function Edit({ attributes, setAttributes }) {
         </>
     );
 }
+
