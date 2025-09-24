@@ -3,6 +3,11 @@
  */
 import mapboxgl from 'mapbox-gl';
 
+/**
+ * Internal dependencies
+ */
+import { weatherTemplate, savedStationTemplate } from './templates';
+
 // SVG icon for the marker
 const markerSvg = `
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -215,12 +220,7 @@ class WeatherStationsMap {
         const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
         const savedStations = this.stations.filter(station => favorites.includes(station.id));
 
-        this.savedStationsList.innerHTML = savedStations.map(station => `
-            <div class="saved-station-item" data-id="${station.id}">
-                <h4>${station.title}</h4>
-                <p>${station.address}</p>
-            </div>
-        `).join('');
+        this.savedStationsList.innerHTML = savedStations.map(savedStationTemplate).join('');
 
         // Add click handlers
         this.savedStationsList.querySelectorAll('.saved-station-item').forEach(item => {
@@ -288,52 +288,7 @@ class WeatherStationsMap {
 
     formatWeatherData(weather) {
         if (!weather) return '';
-
-        const temp = this.currentUnit === 'celsius' ? weather.temperature.celsius : weather.temperature.fahrenheit;
-        const feelsLike = this.currentUnit === 'celsius' ? weather.feelsLike.celsius : weather.feelsLike.fahrenheit;
-        const windSpeed = this.currentUnit === 'celsius' ? weather.windSpeed.metric : weather.windSpeed.imperial;
-        const unit = this.currentUnit === 'celsius' ? '°C' : '°F';
-        const speedUnit = this.currentUnit === 'celsius' ? 'm/s' : 'mph';
-
-        return `
-            <div class="weather-conditions">
-                ${weather.conditions.icon ? `
-                    <img src="https://openweathermap.org/img/w/${weather.conditions.icon}.png" 
-                         alt="${weather.conditions.description || ''}" />
-                ` : ''}
-                <div>
-                    <span>${weather.conditions.main}</span>
-                    <small>${weather.conditions.description}</small>
-                </div>
-            </div>
-            <div class="weather-data">
-                <div class="data-row">
-                    <strong>Temperature:</strong>
-                    <span>${temp}${unit}</span>
-                </div>
-                <div class="data-row feels-like">
-                    <strong>Feels like:</strong>
-                    <span>${feelsLike}${unit}</span>
-                </div>
-                <div class="data-row">
-                    <strong>Humidity:</strong>
-                    <span>${weather.humidity}%</span>
-                </div>
-                <div class="data-row">
-                    <strong>Wind Speed:</strong>
-                    <span>${windSpeed} ${speedUnit}</span>
-                </div>
-                <div class="data-row">
-                    <strong>Wind Direction:</strong>
-                    <span>${weather.windDirection}°</span>
-                </div>
-            </div>
-            ${weather.lastUpdate ? `
-                <div class="last-update">
-                    <small>Last updated: ${new Date(weather.lastUpdate).toLocaleString()}</small>
-                </div>
-            ` : ''}
-        `;
+        return weatherTemplate(weather, this.currentUnit);
     }
 }
 
