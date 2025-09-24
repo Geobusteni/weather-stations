@@ -211,7 +211,7 @@ class WeatherStationsMap {
 
         // If not coming from saved view, hide saved stations and show normal view
         if (!fromSavedView) {
-            this.wrapper.classList.remove('show-saved');
+            this.wrapper.classList.remove('show-saved', 'expanded-view');
             this.container.style.display = 'block';
             this.savedStations.style.display = 'none';
             this.weatherInfo.style.display = 'block';
@@ -291,17 +291,18 @@ class WeatherStationsMap {
             });
         });
 
-        this.wrapper.classList.add('show-saved');
+        // Add classes for expanded view
+        this.wrapper.classList.add('show-saved', 'expanded-view');
         this.weatherInfo.style.display = 'none';
         this.savedStations.style.display = 'block';
-
-        // Keep map visible but adjust layout with CSS
-        this.container.style.display = 'block';
+        
+        // Hide map when showing saved locations
+        this.container.style.display = 'none';
     }
 
     hideSavedStations() {
         // Reset UI classes
-        this.wrapper.classList.remove('show-saved');
+        this.wrapper.classList.remove('show-saved', 'expanded-view');
         this.container.style.display = 'block';
         this.savedStations.style.display = 'none';
         this.weatherInfo.style.display = 'none';

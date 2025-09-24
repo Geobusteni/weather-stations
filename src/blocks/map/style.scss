@@ -53,6 +53,13 @@
       display: block;
     }
   }
+
+  &.expanded-view {
+    & .weather-stations-sidebar {
+      flex: 1;
+      max-width: 100%;
+    }
+  }
 }
 
 .weather-stations-map {
