@@ -143,16 +143,19 @@ class BlockRegistry {
         $wrapper_attributes = \get_block_wrapper_attributes($map_params);
 
 		$title_html = $title ? \sprintf('<h2 class="weather-stations-map-title">%s</h2>', \esc_html($title)) : '';
-        $button_text = \__('Show Saved Locations', 'kst-weather-stations');
+
         return \sprintf(
 			'<div class="weather-stations-map-wrapper">
                 <div class="weather-station-overlay">%s</div>
                 <div class="weather-stations-map-content">
                     <div class="weather-stations-sidebar">
                         <div class="sidebar-controls">
-                            <button class="unit-toggle active" data-unit="celsius">°C</button>
-                            <button class="unit-toggle" data-unit="fahrenheit">°F</button>
-                            <button class="show-saved-button">%s</button>
+                        	<div class="sidebar-temperature-toggle">
+                            <button class="unit-toggle active" data-unit="celsius">%s</button>
+                            /
+                            <button class="unit-toggle" data-unit="fahrenheit">%s</button>
+                            </div>
+                            <button class="show-saved-button" aria-label="Show saved Stations"></button>
                         </div>
                         <div class="station-info">
                             <div class="weather-info" style="display: none;">
@@ -170,7 +173,8 @@ class BlockRegistry {
                 </div>
             </div>',
 			$title_html,
-            \__('Show Saved Locations', 'kst-weather-stations'),
+			\__('Celsius', 'kst-weather-stations'),
+			\__('Fahrenheit', 'kst-weather-stations'),
             \__('Close', 'kst-weather-stations'),
 			$wrapper_attributes
         );

@@ -39,6 +39,12 @@
   margin-right: -25px;
   overflow: auto;
   height: 100vh;
+
+  &.show-saved {
+    .show-saved-button {
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMjUiIHZpZXdCb3g9IjAgMCAxOSAyNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIuOTk5OTQgMy41SDE1Ljk5OTlMMTUuOTc3NSAyMC43MDk0TDkuNDc3NDggMTcuMjA5NEwyLjk5OTk0IDIwLjcwOTRWMy41WiIgZmlsbD0iI0VFRUVFRSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTAuNTMxMjUgMi4yNUwxLjgxMjUgMC45Njg3NUgxNy4xODc1TDE4LjQ2ODggMi4yNVYyNC45OTg1TDkuNSAxOS42ODM3TDAuNTMxMjUgMjQuOTk4NVYyLjI1Wk0zLjA5Mzc1IDMuNTMxMjVWMjAuNTAxNUw5LjUgMTYuNzA1MUwxNS45MDYyIDIwLjUwMTVWMy41MzEyNUgzLjA5Mzc1WiIgZmlsbD0iI0VFRUVFRSIvPgo8L3N2Zz4K");
+    }
+  }
 }
 
 .weather-stations-map {
@@ -47,31 +53,89 @@
   height: 100%;
 }
 
-.station-details {
+.weather-stations-sidebar {
+  align-self: stretch;
+  background: var(--color-bg);
+  color: var(--color-text);
+  display: flex;
+  flex-basis: 30%;
+  flex-direction: column;
+  max-width: 300px;
+  padding: calc(var(--spacing-15) * 2);
 
-  &.active {
-    & .weather-info {
-      display: block;
+  & button {
+    background: transparent;
+    border: 0 none;
+    color: var(--color-text-alt);
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+
+    &:hover {
+      color: var(--color-text);
     }
   }
 
-  & .station-name {
+  & .sidebar-controls {
+    align-items: center;
+    display: flex;
+
+    & button {
+      &:last-child {
+        margin-left: auto;
+      }
+
+      &.active {
+        color: var(--color-text);
+      }
+    }
+  }
+
+  .saved-stations {
+    height: calc(100% - calc(var(--spacing-20) * 2));
+    padding-bottom: calc(var(--spacing-20) * 2);
+    position: relative;
+  }
+
+  .show-saved-button {
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMjUiIHZpZXdCb3g9IjAgMCAxOSAyNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0wLjUzMTI1IDIuMjVMMS44MTI1IDAuOTY4NzVIMTcuMTg3NUwxOC40Njg4IDIuMjVWMjQuOTk4NUw5LjUgMTkuNjgzN0wwLjUzMTI1IDI0Ljk5ODVWMi4yNVpNMy4wOTM3NSAzLjUzMTI1VjIwLjUwMTVMOS41IDE2LjcwNTFMMTUuOTA2MiAyMC41MDE1VjMuNTMxMjVIMy4wOTM3NVoiIGZpbGw9IiNFRUVFRUUiLz4KPC9zdmc+Cg==");
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+  }
+
+  .close-saved-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: transparent;
+    border: 0 none;
+    color: var(--color-text-alt);
+    margin: 0;
+    padding: 0;
+  }
+
+  .station-info {
+    height: 100%;
+  }
+
+  .station-name,
+  .station-address {
     font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 0;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .station-name {
     margin-top: var(--spacing-20);
   }
 
-  & .station-address {
-    margin-bottom: var(--spacing-20);
-    margin-top: 0;
-  }
-
-  & .weather-info {
-    display: none;
+  .station-address {
+    margin-bottom: var(--spacing-10);
   }
 }
-
 
 .weather-stations-list {
   align-self: stretch;
@@ -83,199 +147,6 @@
 }
 
 .weather-stations-map-wrapper {
-
-  .asad {
-    flex: 0 0 300px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    max-height: 500px;
-    overflow-y: auto;
-
-    h3 {
-      margin: 0 0 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #eee;
-      font-size: 16px;
-      color: #2c3e50;
-    }
-
-    .station-details {
-      .station-details-header {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-bottom: 15px;
-
-        .header-controls {
-          display: flex;
-          gap: 8px;
-        }
-
-        .unit-toggle {
-          min-width: 40px;
-          height: 30px;
-          padding: 0 8px;
-          justify-content: center;
-        }
-
-        .favorite-toggle {
-          color: #f1c40f;
-
-          &:hover {
-            color: #f39c12;
-          }
-        }
-
-        .show-saved {
-          width: 100%;
-          justify-content: center;
-        }
-      }
-
-      .saved-locations {
-        .saved-locations-header {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 15px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #eee;
-
-          h3 {
-            margin: 0;
-            font-size: 16px;
-            color: #2c3e50;
-          }
-        }
-
-        .saved-locations-list {
-          margin: 0;
-          padding: 0;
-          list-style: none;
-
-          li {
-            margin-bottom: 8px;
-
-            .saved-location-item {
-              width: 100%;
-              text-align: left;
-              padding: 10px;
-              background: #f8f9fa;
-              border: 1px solid #e9ecef;
-              border-radius: 6px;
-              transition: all 0.2s ease;
-
-              &:hover {
-                background: #e9ecef;
-                transform: translateY(-1px);
-              }
-
-              h4 {
-                margin: 0 0 5px;
-                font-size: 14px;
-                color: #2c3e50;
-              }
-
-              p {
-                margin: 0;
-                font-size: 12px;
-                color: #7f8c8d;
-              }
-            }
-          }
-        }
-      }
-
-      .saved-locations-empty {
-        text-align: center;
-        padding: 20px 0;
-
-        p {
-          margin: 0 0 15px;
-          color: #7f8c8d;
-        }
-      }
-
-      h3 {
-        margin: 0 0 8px;
-        font-size: 18px;
-        color: #2c3e50;
-      }
-
-      .station-address {
-        margin: 0 0 15px;
-        font-size: 14px;
-        color: #7f8c8d;
-      }
-
-      .weather-info {
-        .weather-conditions {
-          display: flex;
-          align-items: center;
-          margin-bottom: 15px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid #eee;
-
-          img {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-          }
-
-          span {
-            font-size: 16px;
-            font-weight: 500;
-            color: #2c3e50;
-          }
-
-          small {
-            display: block;
-            color: #7f8c8d;
-            font-size: 12px;
-          }
-        }
-
-        .weather-data {
-          .data-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 14px;
-
-            strong {
-              color: #2c3e50;
-            }
-
-            span {
-              color: #34495e;
-            }
-
-            &.feels-like {
-              margin-left: 15px;
-              color: #7f8c8d;
-              font-size: 13px;
-            }
-          }
-        }
-
-        .last-update {
-          margin-top: 15px;
-          padding-top: 10px;
-          border-top: 1px solid #eee;
-          text-align: center;
-
-          small {
-            color: #95a5a6;
-            font-size: 12px;
-          }
-        }
-      }
-    }
-  }
-
   .weather-stations-map-container {
     flex: 1;
     border-radius: 8px;

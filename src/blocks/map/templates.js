@@ -1,50 +1,45 @@
+import {__} from '@wordpress/i18n';
 /**
  * Weather station templates
  */
-
-export const weatherConditions = ({ icon, main, description }) => `
-    <div class="weather-conditions">
-        ${icon ? `
-            <img src="https://openweathermap.org/img/w/${icon}.png" 
-                 alt="${description || ''}" />
-        ` : ''}
+export const weatherConditions = ({ icon, main, description }) => {
+    const title = __('Weather:', 'weather-stations-map');
+   return ` <div class="weather-conditions">
         <div>
-            <span>${main}</span>
-            <small>${description}</small>
+            <strong>${title}</strong>
+            <span>${main} - ${description}</span>
         </div>
-    </div>
-`;
+    </div>`
+};
 
-export const weatherData = ({ temp, feelsLike, humidity, windSpeed, windDirection, unit, speedUnit }) => `
-    <div class="weather-data">
+export const weatherData = ({ temp, feelsLike, humidity, windSpeed, windDirection, unit, speedUnit }) => {
+    const tempTitle = __('Temperature:', 'weather-stations-map');
+    const humidityTitle = __('Humidity:', 'weather-stations-map');
+    const windTitle = __('Wind:', 'weather-stations-map');
+
+    return `<div class="weather-data">
         <div class="data-row">
-            <strong>Temperature:</strong>
-            <span>${temp}${unit}</span>
-        </div>
-        <div class="data-row feels-like">
-            <strong>Feels like:</strong>
-            <span>${feelsLike}${unit}</span>
+            <strong>${tempTitle}</strong>
+            <span>${temp} - ${feelsLike}${unit}</span>
         </div>
         <div class="data-row">
-            <strong>Humidity:</strong>
+            <strong>${humidityTitle}</strong>
             <span>${humidity}%</span>
         </div>
         <div class="data-row">
-            <strong>Wind Speed:</strong>
-            <span>${windSpeed} ${speedUnit}</span>
+            <strong>${windTitle}</strong>
+            <span>${windSpeed} ${speedUnit} | ${windDirection}°</span>
         </div>
-        <div class="data-row">
-            <strong>Wind Direction:</strong>
-            <span>${windDirection}°</span>
-        </div>
-    </div>
-`;
+    </div>`;
+}
 
-export const lastUpdate = (timestamp) => timestamp ? `
-    <div class="last-update">
-        <small>Last updated: ${new Date(timestamp).toLocaleString()}</small>
-    </div>
-` : '';
+export const lastUpdate = (timestamp) => {
+    if ( !timestamp ) return '';
+    const title = __('Last update:', 'weather-stations-map');
+    return `<div class="last-update">
+        <small>${title} ${new Date(timestamp).toLocaleString()}</small>
+    </div>`
+};
 
 export const weatherTemplate = (weather, unit) => {
     const temp = unit === 'celsius' ? weather.temperature.celsius : weather.temperature.fahrenheit;
