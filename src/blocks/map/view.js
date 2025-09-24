@@ -241,11 +241,41 @@ class WeatherStationsMap {
     }
 
     hideSavedStations() {
+        // Reset UI classes
         this.wrapper.classList.remove('show-saved');
         this.container.style.display = 'block';
         this.savedStations.style.display = 'none';
-        if (this.activeStation) {
-            this.weatherInfo.style.display = 'block';
+        this.weatherInfo.style.display = 'none';
+
+        // Clear active station
+        this.activeStation = null;
+
+        // Clear saved stations list
+        this.savedStationsList.innerHTML = '';
+
+        // Create bounds that will include all stations and default center
+        const bounds = new mapboxgl.LngLatBounds();
+        const { centerLat, centerLng, zoom } = this.settings;
+
+        // Add default center to bounds
+        if (centerLng && centerLat) {
+            bounds.extend([centerLng, centerLat]);
+        }
+
+        // Add all stations to bounds
+        this.stations.forEach(station => {
+            if (station.lat && station.lng) {
+                bounds.extend([station.lng, station.lat]);
+            }
+        });
+
+        // Fit map to bounds if we have any points
+        if (!bounds.isEmpty()) {
+            this.map.fitBounds(bounds, {
+                padding: 50,
+                maxZoom: zoom || 16, // Use provided zoom as maximum, or default to 16
+                duration: 1000 // smooth animation
+            });
         }
     }
 
