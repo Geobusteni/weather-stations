@@ -152,20 +152,51 @@ class WeatherStationsMap {
         this.wrapper.addEventListener('scroll', handleScroll, { passive: true });
     }
 
-    showStationDetails(station) {
+    showStationDetails(station, fromSavedView = false) {
         this.activeStation = station;
-        this.wrapper.classList.remove('show-saved');
-        this.container.style.display = 'block';
-        this.savedStations.style.display = 'none';
-        this.weatherInfo.style.display = 'block';
 
-        // Update station info
-        this.weatherInfo.querySelector('.station-name').textContent = station.title;
-        this.weatherInfo.querySelector('.station-address').textContent = station.address;
+        // If not coming from saved view, hide saved stations and show normal view
+        if (!fromSavedView) {
+            this.wrapper.classList.remove('show-saved');
+            this.container.style.display = 'block';
+            this.savedStations.style.display = 'none';
+            this.weatherInfo.style.display = 'block';
+        }
 
         // Update weather data
-        const weatherData = this.weatherInfo.querySelector('.weather-data');
-        weatherData.innerHTML = this.formatWeatherData(station.weather);
+        const weatherData = this.formatWeatherData(station.weather);
+
+        if (fromSavedView) {
+            // In saved view, update the station item to include weather data
+            const stationItem = this.savedStationsList.querySelector(`[data-id="${station.id}"]`);
+            if (stationItem) {
+                // If there's already weather info, remove it
+                const existingWeatherInfo = stationItem.querySelector('.weather-info');
+                if (existingWeatherInfo) {
+                    existingWeatherInfo.remove();
+                }
+
+                // Add weather info
+                const weatherInfo = document.createElement('div');
+                weatherInfo.className = 'weather-info';
+                weatherInfo.innerHTML = weatherData;
+                stationItem.appendChild(weatherInfo);
+
+                // Add active class to this item, remove from others
+                this.savedStationsList.querySelectorAll('.saved-station-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                stationItem.classList.add('active');
+            }
+
+            // Show map but keep saved view active
+            this.container.style.display = 'block';
+        } else {
+            // In normal view, update the weather info section
+            this.weatherInfo.querySelector('.station-name').textContent = station.title;
+            this.weatherInfo.querySelector('.station-address').textContent = station.address;
+            this.weatherInfo.querySelector('.weather-data').innerHTML = weatherData;
+        }
 
         // Center map on station
         this.map.panTo([station.lng, station.lat]);
@@ -187,15 +218,17 @@ class WeatherStationsMap {
             item.addEventListener('click', () => {
                 const station = this.stations.find(s => s.id === parseInt(item.dataset.id));
                 if (station) {
-                    this.showStationDetails(station);
+                    this.showStationDetails(station, true);
                 }
             });
         });
 
         this.wrapper.classList.add('show-saved');
-        this.container.style.display = 'none';
         this.weatherInfo.style.display = 'none';
         this.savedStations.style.display = 'block';
+        
+        // Keep map visible but adjust layout with CSS
+        this.container.style.display = 'block';
     }
 
     hideSavedStations() {
