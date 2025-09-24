@@ -216,14 +216,23 @@ class WeatherStationsMap {
             this.weatherInfo.style.display = 'block';
         }
 
-        // Update save button state
+        // Update save button and My Locations button state
         const saveButton = this.wrapper.querySelector('.save-station-button');
+        const myLocationsButton = this.wrapper.querySelector('.my-locations-button');
         const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
 
+        // Update save button state
         if (favorites.includes(station.id)) {
             saveButton.classList.add('saved');
         } else {
             saveButton.classList.remove('saved');
+        }
+
+        // Update My Locations button state
+        if (favorites.length > 0) {
+            myLocationsButton.classList.add('active');
+        } else {
+            myLocationsButton.classList.remove('active');
         }
 
         // Update weather data
