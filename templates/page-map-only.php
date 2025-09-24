@@ -6,7 +6,12 @@
  */
 wp_head();
 
-echo sprintf( '<body class="%s">', implode( ' ', get_body_class() ) );
+$bodyclasses = array_merge(
+	get_body_class(),
+	['fullwidth', 'map-only', 'kst-weather-stations-page']
+);
+
+echo sprintf( '<body class="%s">', implode( ' ', $bodyclasses) );
 
 while ( have_posts() ) :
 	the_post();
