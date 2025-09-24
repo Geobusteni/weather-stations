@@ -175,6 +175,14 @@ class WeatherStationsMap {
                 this.updateMarkerFavorites(JSON.parse(e.newValue || '[]'));
             }
         });
+
+        // Handle clicking outside sidebar to clear station data
+        this.container.addEventListener('click', (e) => {
+            // Only handle clicks directly on the map container, not on markers or other elements
+            if (e.target === this.container || e.target === this.map.getCanvas()) {
+                this.clearStationDetails();
+            }
+        });
     }
 
     initOverlay() {
@@ -349,6 +357,18 @@ class WeatherStationsMap {
             const el = marker.getElement();
             el.className = `weather-station-marker${favorites.includes(parseInt(id)) ? ' is-favorite' : ''}`;
         });
+    }
+
+    clearStationDetails() {
+        // Only clear if we're in normal view (not saved stations view)
+        if (!this.wrapper.classList.contains('show-saved')) {
+            this.activeStation = null;
+            this.weatherInfo.style.display = 'none';
+            
+            // Reset save button state
+            const saveButton = this.wrapper.querySelector('.save-station-button');
+            saveButton.classList.remove('saved');
+        }
     }
 
     formatWeatherData(weather) {
