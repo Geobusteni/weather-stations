@@ -41,8 +41,16 @@
   height: 100vh;
 
   &.show-saved {
-    .show-saved-button {
-      background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMjUiIHZpZXdCb3g9IjAgMCAxOSAyNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIuOTk5OTQgMy41SDE1Ljk5OTlMMTUuOTc3NSAyMC43MDk0TDkuNDc3NDggMTcuMjA5NEwyLjk5OTk0IDIwLjcwOTRWMy41WiIgZmlsbD0iI0VFRUVFRSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTAuNTMxMjUgMi4yNUwxLjgxMjUgMC45Njg3NUgxNy4xODc1TDE4LjQ2ODggMi4yNVYyNC45OTg1TDkuNSAxOS42ODM3TDAuNTMxMjUgMjQuOTk4NVYyLjI1Wk0zLjA5Mzc1IDMuNTMxMjVWMjAuNTAxNUw5LjUgMTYuNzA1MUwxNS45MDYyIDIwLjUwMTVWMy41MzEyNUgzLjA5Mzc1WiIgZmlsbD0iI0VFRUVFRSIvPgo8L3N2Zz4K");
+    .save-station-button {
+      display: none;
+    }
+
+    .my-locations-button {
+      display: none;
+    }
+
+    .close-saved-button {
+      display: block;
     }
   }
 }
@@ -91,30 +99,35 @@
     }
   }
 
-  .saved-stations {
-    height: calc(100% - calc(var(--spacing-20) * 2));
-    padding-bottom: calc(var(--spacing-20) * 2);
-    position: relative;
-  }
-
-  .show-saved-button {
+  .save-station-button {
     background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMjUiIHZpZXdCb3g9IjAgMCAxOSAyNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0wLjUzMTI1IDIuMjVMMS44MTI1IDAuOTY4NzVIMTcuMTg3NUwxOC40Njg4IDIuMjVWMjQuOTk4NUw5LjUgMTkuNjgzN0wwLjUzMTI1IDI0Ljk5ODVWMi4yNVpNMy4wOTM3NSAzLjUzMTI1VjIwLjUwMTVMOS41IDE2LjcwNTFMMTUuOTA2MiAyMC41MDE1VjMuNTMxMjVIMy4wOTM3NVoiIGZpbGw9IiNFRUVFRUUiLz4KPC9zdmc+Cg==");
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
     height: 30px;
     width: 30px;
+
+    &.saved {
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMjUiIHZpZXdCb3g9IjAgMCAxOSAyNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIuOTk5OTQgMy41SDE1Ljk5OTlMMTUuOTc3NSAyMC43MDk0TDkuNDc3NDggMTcuMjA5NEwyLjk5OTk0IDIwLjcwOTRWMy41WiIgZmlsbD0iI0VFRUVFRSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTAuNTMxMjUgMi4yNUwxLjgxMjUgMC45Njg3NUgxNy4xODc1TDE4LjQ2ODggMi4yNVYyNC45OTg1TDkuNSAxOS42ODM3TDAuNTMxMjUgMjQuOTk4NVYyLjI1Wk0zLjA5Mzc1IDMuNTMxMjVWMjAuNTAxNUw5LjUgMTYuNzA1MUwxNS45MDYyIDIwLjUwMTVWMy41MzEyNUgzLjA5Mzc1WiIgZmlsbD0iI0VFRUVFRSIvPgo8L3N2Zz4K");
+    }
   }
 
-  .close-saved-button {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: transparent;
-    border: 0 none;
-    color: var(--color-text-alt);
-    margin: 0;
-    padding: 0;
+  & .navigation-controls {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  & .my-locations-button {
+    display: none;
+
+    &.active {
+      display: block;
+    }
+  }
+
+  & .close-saved-button {
+    display: none;
   }
 
   .station-info {

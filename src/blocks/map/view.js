@@ -121,13 +121,52 @@ class WeatherStationsMap {
             });
         });
 
-        // Show saved stations
-        const showSavedButton = this.wrapper.querySelector('.show-saved-button');
-        showSavedButton.addEventListener('click', () => this.showSavedStations());
+        // Save station button
+        const saveButton = this.wrapper.querySelector('.save-station-button');
 
-        // Close saved stations
-        const closeSavedButton = this.wrapper.querySelector('.close-saved-button');
-        closeSavedButton.addEventListener('click', () => this.hideSavedStations());
+        saveButton.addEventListener('click', () => {
+            if (!this.activeStation) return;
+
+            const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
+            const isFavorite = favorites.includes(this.activeStation.id);
+
+            if (isFavorite) {
+                // Remove from favorites
+                const newFavorites = favorites.filter(id => id !== this.activeStation.id);
+                localStorage.setItem('kst_favorite_stations', JSON.stringify(newFavorites));
+                saveButton.classList.remove('saved');
+
+                // Hide My Locations button if no more favorites
+                if (newFavorites.length === 0) {
+                    this.wrapper.querySelector('.my-locations-button').classList.remove('active');
+                }
+            } else {
+                // Add to favorites
+                favorites.push(this.activeStation.id);
+                localStorage.setItem('kst_favorite_stations', JSON.stringify(favorites));
+                saveButton.classList.add('saved');
+
+                // Show My Locations button
+                this.wrapper.querySelector('.my-locations-button').classList.add('active');
+            }
+
+            // Trigger storage event for marker updates
+            window.dispatchEvent(new Event('storage'));
+        });
+
+        // My Locations button
+        const myLocationsButton = this.wrapper.querySelector('.my-locations-button');
+
+        myLocationsButton.addEventListener('click', () => {
+            this.showSavedStations();
+        });
+
+        // Close saved stations button
+        const closeButton = this.wrapper.querySelector('.close-saved-button');
+
+        closeButton.addEventListener('click', () => {
+            this.hideSavedStations();
+        });
 
         // Handle favorites changes
         window.addEventListener('storage', (e) => {
@@ -153,7 +192,7 @@ class WeatherStationsMap {
                     hasFaded = true;
                     overlay.style.opacity = '0';
                     overlay.style.transition = 'opacity 0.3s ease-out';
-                    
+
                     setTimeout(() => {
                         if (overlay.parentNode) {
                             overlay.parentNode.removeChild(overlay);
@@ -175,6 +214,16 @@ class WeatherStationsMap {
             this.container.style.display = 'block';
             this.savedStations.style.display = 'none';
             this.weatherInfo.style.display = 'block';
+        }
+
+        // Update save button state
+        const saveButton = this.wrapper.querySelector('.save-station-button');
+        const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
+
+        if (favorites.includes(station.id)) {
+            saveButton.classList.add('saved');
+        } else {
+            saveButton.classList.remove('saved');
         }
 
         // Update weather data
@@ -235,7 +284,7 @@ class WeatherStationsMap {
         this.wrapper.classList.add('show-saved');
         this.weatherInfo.style.display = 'none';
         this.savedStations.style.display = 'block';
-        
+
         // Keep map visible but adjust layout with CSS
         this.container.style.display = 'block';
     }

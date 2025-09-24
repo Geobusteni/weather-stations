@@ -149,13 +149,15 @@ class BlockRegistry {
                 <div class="weather-station-overlay">%s</div>
                 <div class="weather-stations-map-content">
                     <div class="weather-stations-sidebar">
-                        <div class="sidebar-controls">
-                        	<div class="sidebar-temperature-toggle">
-                            <button class="unit-toggle active" data-unit="celsius">%s</button>
-                            /
-                            <button class="unit-toggle" data-unit="fahrenheit">%s</button>
+                        <div class="sidebar-header">
+                            <div class="sidebar-controls">
+                                <div class="sidebar-temperature-toggle">
+                                    <button class="unit-toggle active" data-unit="celsius">%s</button>
+                                    /
+                                    <button class="unit-toggle" data-unit="fahrenheit">%s</button>
+                                </div>
+                                <button class="save-station-button"></button>
                             </div>
-                            <button class="show-saved-button" aria-label="Show saved Stations"></button>
                         </div>
                         <div class="station-info">
                             <div class="weather-info" style="display: none;">
@@ -165,8 +167,11 @@ class BlockRegistry {
                             </div>
                             <div class="saved-stations" style="display: none;">
                                 <div class="saved-stations-list"></div>
-                                <button class="close-saved-button">%s</button>
                             </div>
+                        </div>
+                        <div class="navigation-controls">
+                            <button class="my-locations-button">%s</button>
+                            <button class="close-saved-button">%s</button>
                         </div>
                     </div>
                     <div %s></div>
@@ -175,6 +180,7 @@ class BlockRegistry {
 			$title_html,
 			\__('Celsius', 'kst-weather-stations'),
 			\__('Fahrenheit', 'kst-weather-stations'),
+            \__('My Locations', 'kst-weather-stations'),
             \__('Close', 'kst-weather-stations'),
 			$wrapper_attributes
         );
