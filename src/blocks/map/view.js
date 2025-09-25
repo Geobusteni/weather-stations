@@ -177,11 +177,25 @@ class WeatherStationsMap {
             this.showSavedStations();
         });
 
+        const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
+
+        // Show the button if there are saved stations.
+        if (favorites.length > 0) {
+            myLocationsButton.classList.add('active');
+        }
+
         // Close saved stations button
         const closeButton = this.wrapper.querySelector('.close-saved-button');
 
         closeButton.addEventListener('click', () => {
             this.hideSavedStations();
+
+            const favorites = JSON.parse(localStorage.getItem('kst_favorite_stations') || '[]');
+
+            // Show the button if there are saved stations.
+            if (favorites.length > 0) {
+                myLocationsButton.classList.add('active');
+            }
         });
 
         // Handle favorites changes
@@ -309,11 +323,11 @@ class WeatherStationsMap {
         // Add click handlers
         this.savedStationsList.querySelectorAll('.saved-station-item').forEach(item => {
             item.addEventListener('click', () => {
-                // Close any open weather info panels first
+                // Remove existing weather info from all items
                 this.savedStationsList.querySelectorAll('.weather-info').forEach(info => {
                     info.remove();
                 });
-                
+
                 const station = this.stations.find(s => s.id === parseInt(item.dataset.id));
                 if (station) {
                     this.showStationDetails(station, true);
@@ -325,7 +339,7 @@ class WeatherStationsMap {
         this.wrapper.classList.add('show-saved', 'expanded-view');
         this.weatherInfo.style.display = 'none';
         this.savedStations.style.display = 'block';
-        
+
         // Hide map when showing saved locations
         this.container.style.display = 'none';
     }
@@ -386,7 +400,7 @@ class WeatherStationsMap {
         if (!this.wrapper.classList.contains('show-saved')) {
             this.activeStation = null;
             this.weatherInfo.style.display = 'none';
-            
+
             // Reset save button state
             const saveButton = this.wrapper.querySelector('.save-station-button');
             saveButton.classList.remove('saved');
