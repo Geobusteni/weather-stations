@@ -7,6 +7,7 @@ import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { TextControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Location panel component
@@ -16,25 +17,66 @@ const LocationPanel = () => {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
 
-    // Get post type and meta values
-    const { postType, address, latitude, longitude, isEditedMetaFieldValue } = useSelect((select) => {
-        const { getCurrentPostType, getEditedPostAttribute } = select(editorStore);
+    // Get post type, meta values, and post status
+    const { postType, postId, address, latitude, longitude, isEditedMetaFieldValue, isPublished } = useSelect((select) => {
+        const { getCurrentPostType, getCurrentPostId, getEditedPostAttribute } = select(editorStore);
+        const { getEntityRecord } = select(coreStore);
+        const post = getEntityRecord('postType', getCurrentPostType(), getCurrentPostId());
+        
         return {
             postType: getCurrentPostType(),
+            postId: getCurrentPostId(),
             address: getEditedPostAttribute('meta')?._kst_ws_address || '',
             latitude: getEditedPostAttribute('meta')?._kst_ws_latitude || '',
             longitude: getEditedPostAttribute('meta')?._kst_ws_longitude || '',
             isEditedMetaFieldValue: getEditedPostAttribute('meta'),
+            isPublished: post?.status === 'publish',
         };
     }, []);
 
     // Get dispatch functions
-    const { editPost } = useDispatch(editorStore);
+    const { editPost, savePost } = useDispatch(editorStore);
 
     // Only show panel for weather stations
     if (postType !== 'weather-station') {
         return null;
     }
+
+    // Handle saving or publishing
+    const handleSave = async () => {
+        if (isPublished) {
+            await savePost();
+        } else {
+            // If not published, trigger the publish button
+            const publishButton = document.querySelector('.editor-post-publish-button__button');
+            if (publishButton) {
+                publishButton.click();
+            }
+        }
+    };
+
+    // Handle geocoding result
+    const handleGeocodeResult = async (address, lng, lat) => {
+        const newMeta = {
+            _kst_ws_address: address,
+            _kst_ws_longitude: lng,
+            _kst_ws_latitude: lat,
+        };
+
+        // Update the post meta
+        editPost({
+            meta: {
+                ...isEditedMetaFieldValue,
+                ...newMeta
+            }
+        });
+
+        // Force a dirty state
+        editPost({ modified: true });
+
+        // Save or publish
+        await handleSave();
+    };
 
     // Handle address search
     const handleAddressSearch = async (searchText) => {
@@ -84,24 +126,46 @@ const LocationPanel = () => {
         }
     };
 
-    // Handle suggestion selection
-    const handleSuggestionSelect = (suggestion) => {
-        const newMeta = {
-            _kst_ws_address: suggestion.text,
-            _kst_ws_longitude: suggestion.coordinates[0],
-            _kst_ws_latitude: suggestion.coordinates[1],
-        };
+    // Handle reverse geocoding
+    const handleReverseGeocode = async (lng, lat) => {
+        if (!kstWeatherStations?.mapToken) {
+            setError(__('Mapbox token is not configured', 'kst-weather-stations'));
+            return;
+        }
 
-        editPost({
-            meta: {
-                ...isEditedMetaFieldValue,
-                ...newMeta
+        try {
+            const response = await fetch(
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${kstWeatherStations.mapToken}`,
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        });
 
-        // Force a dirty state
-        editPost({ modified: true });
+            const data = await response.json();
 
+            if (data.features && data.features.length > 0) {
+                const address = data.features[0].place_name;
+                await handleGeocodeResult(address, lng, lat);
+            }
+        } catch (err) {
+            console.error('Reverse geocoding failed:', err);
+            setError(__('Failed to get address for coordinates', 'kst-weather-stations'));
+        }
+    };
+
+    // Handle suggestion selection
+    const handleSuggestionSelect = async (suggestion) => {
+        await handleGeocodeResult(
+            suggestion.text,
+            suggestion.coordinates[0],
+            suggestion.coordinates[1]
+        );
         setShowSuggestions(false);
         setSuggestions([]);
     };
@@ -126,6 +190,16 @@ const LocationPanel = () => {
 
         // Force a dirty state
         editPost({ modified: true });
+
+        // If both lat and lng are set, trigger reverse geocoding
+        if (field === '_kst_ws_latitude' || field === '_kst_ws_longitude') {
+            const newLat = field === '_kst_ws_latitude' ? value : latitude;
+            const newLng = field === '_kst_ws_longitude' ? value : longitude;
+            
+            if (newLat && newLng) {
+                handleReverseGeocode(newLng, newLat);
+            }
+        }
     };
 
     return (
@@ -191,4 +265,3 @@ const LocationPanel = () => {
 };
 
 export default LocationPanel;
-
