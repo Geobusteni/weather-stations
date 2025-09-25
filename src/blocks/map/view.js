@@ -139,6 +139,12 @@ class WeatherStationsMap {
                 localStorage.setItem('kst_favorite_stations', JSON.stringify(newFavorites));
                 saveButton.classList.remove('saved');
 
+                // Update marker class
+                const marker = this.markers[this.activeStation.id];
+                if (marker) {
+                    marker.getElement().classList.remove('is-favorite');
+                }
+
                 // Hide My Locations button if no more favorites
                 if (newFavorites.length === 0) {
                     this.wrapper.querySelector('.my-locations-button').classList.remove('active');
@@ -148,6 +154,12 @@ class WeatherStationsMap {
                 favorites.push(this.activeStation.id);
                 localStorage.setItem('kst_favorite_stations', JSON.stringify(favorites));
                 saveButton.classList.add('saved');
+
+                // Update marker class
+                const marker = this.markers[this.activeStation.id];
+                if (marker) {
+                    marker.getElement().classList.add('is-favorite');
+                }
 
                 // Show My Locations button
                 this.wrapper.querySelector('.my-locations-button').classList.add('active');
