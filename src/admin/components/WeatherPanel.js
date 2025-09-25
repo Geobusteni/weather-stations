@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
+import { store as coreStore } from '@wordpress/core-data';
 import { useState, useMemo } from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 
@@ -56,8 +57,10 @@ const WeatherPanel = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const { postType, postId, weatherData, lastUpdate, hasLocation } = useSelect((select) => {
+    const { postType, postId, weatherData, lastUpdate, hasLocation, isPublished } = useSelect((select) => {
         const { getCurrentPostType, getCurrentPostId, getEditedPostAttribute } = select(editorStore);
+        const { getEntityRecord } = select(coreStore);
+        const post = getEntityRecord('postType', getCurrentPostType(), getCurrentPostId());
         const meta = getEditedPostAttribute('meta') || {};
         return {
             postType: getCurrentPostType(),
@@ -65,10 +68,11 @@ const WeatherPanel = () => {
             weatherData: normalizeWeatherData(meta._kst_ws_weather_data),
             lastUpdate: meta._kst_ws_last_update || null,
             hasLocation: !!(meta._kst_ws_latitude && meta._kst_ws_longitude),
+            isPublished: post?.status === 'publish',
         };
     }, []);
 
-    const { editPost } = useDispatch(editorStore);
+    const { editPost, savePost } = useDispatch(editorStore);
 
     if (postType !== 'weather-station') {
         return null;
@@ -180,21 +184,51 @@ const WeatherPanel = () => {
                         </div>
                     )}
                     {error && <p className="error-message">{error}</p>}
-                    <Button
-                        variant="secondary"
-                        onClick={handleRefresh}
-                        isBusy={isLoading}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <>
-                                <Spinner />
-                                {__('Updating...', 'kst-weather-stations')}
-                            </>
-                        ) : (
-                            __('Refresh Weather Data', 'kst-weather-stations')
-                        )}
-                    </Button>
+                    <div className="weather-actions" style={{ display: 'flex', gap: '10px' }}>
+                        <Button
+                            variant="secondary"
+                            onClick={handleRefresh}
+                            isBusy={isLoading}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Spinner />
+                                    {__('Updating...', 'kst-weather-stations')}
+                                </>
+                            ) : (
+                                __('Refresh Weather Data', 'kst-weather-stations')
+                            )}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            isDestructive
+                            onClick={async () => {
+                                try {
+                                    // Clear weather data
+                                    await editPost({
+                                        meta: {
+                                            _kst_ws_weather_data: null,
+                                            _kst_ws_last_update: null
+                                        }
+                                    });
+
+                                    // Force a dirty state
+                                    await editPost({ modified: true });
+
+                                    // Save if published
+                                    if (isPublished) {
+                                        await savePost();
+                                    }
+                                } catch (err) {
+                                    console.error('Failed to delete weather data:', err);
+                                    setError(__('Failed to delete weather data', 'kst-weather-stations'));
+                                }
+                            }}
+                        >
+                            {__('Delete Weather Data', 'kst-weather-stations')}
+                        </Button>
+                    </div>
                 </>
             )}
         </PluginDocumentSettingPanel>
