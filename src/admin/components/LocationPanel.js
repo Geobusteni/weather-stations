@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { TextControl } from '@wordpress/components';
+import { TextControl, Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { store as coreStore } from '@wordpress/core-data';
@@ -260,6 +260,41 @@ const LocationPanel = () => {
                 />
             </div>
             {error && <p className="error-message">{error}</p>}
+            
+            <div className="delete-data-section" style={{ marginTop: '20px', borderTop: '1px solid #e0e0e0', paddingTop: '20px' }}>
+                <Button
+                    variant="secondary"
+                    isDestructive
+                    onClick={async () => {
+                        // Clear all location and weather meta fields
+                        const clearedMeta = {
+                            _kst_ws_address: '',
+                            _kst_ws_latitude: null,
+                            _kst_ws_longitude: null,
+                            _kst_ws_weather_data: null,
+                            _kst_ws_last_update: null,
+                        };
+
+                        // Update the post meta
+                        editPost({
+                            meta: {
+                                ...isEditedMetaFieldValue,
+                                ...clearedMeta
+                            }
+                        });
+
+                        // Force a dirty state
+                        editPost({ modified: true });
+
+                        // Save if published
+                        if (isPublished) {
+                            await savePost();
+                        }
+                    }}
+                >
+                    {__('Delete Location & Weather Data', 'kst-weather-stations')}
+                </Button>
+            </div>
         </PluginDocumentSettingPanel>
     );
 };
