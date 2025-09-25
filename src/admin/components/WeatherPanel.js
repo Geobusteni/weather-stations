@@ -56,7 +56,7 @@ const WeatherPanel = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const { postType, postId, weatherData, lastUpdate } = useSelect((select) => {
+    const { postType, postId, weatherData, lastUpdate, hasLocation } = useSelect((select) => {
         const { getCurrentPostType, getCurrentPostId, getEditedPostAttribute } = select(editorStore);
         const meta = getEditedPostAttribute('meta') || {};
         return {
@@ -64,6 +64,7 @@ const WeatherPanel = () => {
             postId: getCurrentPostId(),
             weatherData: normalizeWeatherData(meta._kst_ws_weather_data),
             lastUpdate: meta._kst_ws_last_update || null,
+            hasLocation: !!(meta._kst_ws_latitude && meta._kst_ws_longitude),
         };
     }, []);
 
@@ -163,31 +164,39 @@ const WeatherPanel = () => {
             title={__('Weather Data', 'kst-weather-stations')}
             className="weather-station-weather-panel"
         >
-            {renderWeather(weatherData)}
-            {lastUpdate && (
-                <div className="weather-update-time">
-                    <small>
-                        {__('Last updated:', 'kst-weather-stations')}{' '}
-                        {new Date(lastUpdate).toLocaleString()}
-                    </small>
-                </div>
+            {!hasLocation ? (
+                <p className="location-missing-message" style={{ color: '#cc1818' }}>
+                    {__('Please add location data first to fetch weather information.', 'kst-weather-stations')}
+                </p>
+            ) : (
+                <>
+                    {renderWeather(weatherData)}
+                    {lastUpdate && (
+                        <div className="weather-update-time">
+                            <small>
+                                {__('Last updated:', 'kst-weather-stations')}{' '}
+                                {new Date(lastUpdate).toLocaleString()}
+                            </small>
+                        </div>
+                    )}
+                    {error && <p className="error-message">{error}</p>}
+                    <Button
+                        variant="secondary"
+                        onClick={handleRefresh}
+                        isBusy={isLoading}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <>
+                                <Spinner />
+                                {__('Updating...', 'kst-weather-stations')}
+                            </>
+                        ) : (
+                            __('Refresh Weather Data', 'kst-weather-stations')
+                        )}
+                    </Button>
+                </>
             )}
-            {error && <p className="error-message">{error}</p>}
-            <Button
-                variant="secondary"
-                onClick={handleRefresh}
-                isBusy={isLoading}
-                disabled={isLoading}
-            >
-                {isLoading ? (
-                    <>
-                        <Spinner />
-                        {__('Updating...', 'kst-weather-stations')}
-                    </>
-                ) : (
-                    __('Refresh Weather Data', 'kst-weather-stations')
-                )}
-            </Button>
         </PluginDocumentSettingPanel>
     );
 };
