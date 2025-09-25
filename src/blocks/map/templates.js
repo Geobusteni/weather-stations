@@ -64,7 +64,9 @@ export const weatherTemplate = (weather, unit) => {
 
 export const savedStationTemplate = (station) => `
     <div class="saved-station-item" data-id="${station.id}">
-        <h3 class="station-name">${station.title}</h3>
-        <p class="station-address">${station.address}</p>
+        <div class="station-header">
+            <h3 class="station-name">${station.title}</h3>
+            <p class="station-address">${station.address}</p>
+        </div>
     </div>
 `;

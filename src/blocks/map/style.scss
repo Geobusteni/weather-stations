@@ -180,6 +180,13 @@
     transform: translateY(-50%);
     width: 100%;
   }
+
+  .saved-station-item {
+    .station-name,
+    .station-address {
+      cursor: pointer;
+    }
+  }
 }
 
 .weather-stations-list {

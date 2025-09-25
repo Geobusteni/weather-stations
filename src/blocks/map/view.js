@@ -309,6 +309,11 @@ class WeatherStationsMap {
         // Add click handlers
         this.savedStationsList.querySelectorAll('.saved-station-item').forEach(item => {
             item.addEventListener('click', () => {
+                // Close any open weather info panels first
+                this.savedStationsList.querySelectorAll('.weather-info').forEach(info => {
+                    info.remove();
+                });
+                
                 const station = this.stations.find(s => s.id === parseInt(item.dataset.id));
                 if (station) {
                     this.showStationDetails(station, true);
